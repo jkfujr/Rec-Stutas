@@ -16,17 +16,12 @@
 
 ```
 pip install -r requirements.txt
-
-# 支持SSL (可选)
-pip install SSLContext
 ```
 
 3. 添加 API
 
 ```
-# 编辑 `./config/rec_api.py` 文件
-
-
+# 编辑 `config.example.yaml` 文件，添加录播姬/BLREC地址并重命名为 `config.yaml` 
 ```
 
 4. 运行
@@ -42,7 +37,9 @@ python main.py
 ## 更新计划(饼)
 
 - 日志
-- 
+- 没想好
+
+
 ## 联系方式
 
 Rec-NIC 今天也是咕咕咕的一天 179319267
