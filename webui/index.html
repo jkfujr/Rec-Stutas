@@ -57,7 +57,7 @@
 
         /* 导航栏 */
         .navbar {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+            box-shadow: 0 .125rem .5rem rgba(0, 0, 0, .15);
             z-index: 3;
         }
 
@@ -65,14 +65,14 @@
         .navbar-blur-mode {
             background: transparent !important;
             background: rgba(255, 255, 255, .9rem) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
+            backdrop-filter: blur(.5rem) !important;
+            -webkit-backdrop-filter: blur(.5rem) !important;
         }
 
         /* 侧边栏 */
         .sidebar {
             background-color: #f5f5f5;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, .15);
+            box-shadow: .125rem 0 .5rem rgba(0, 0, 0, .15);
             z-index: 2;
         }
 
@@ -80,7 +80,7 @@
         .sidebar-blur-mode {
             background: transparent !important;
             background: rgba(255, 255, 255, .9rem) !important;
-            backdrop-filter: saturate(150%) blur(12px) !important;
+            backdrop-filter: saturate(150%) blur(.75rem) !important;
         }
 
         /* 搜索框样式 */
@@ -88,7 +88,7 @@
             flex-shrink: 0;
             position: sticky;
             top: 0;
-            padding: 5px;
+            padding: .3125rem;
             background-color: transparent;
             z-index: 100;
         }
@@ -163,7 +163,7 @@
         /* 详情区域 */
         .details {
             flex-grow: 1;
-            max-height: calc(100vh - 56px);
+            max-height: calc(100vh - 3.5rem);
             overflow-y: auto;
             background-color: #f5f5f5;
             padding: .625rem;
