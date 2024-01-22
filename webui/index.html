@@ -33,7 +33,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", STHeiti, "Microsoft YaHei", SimSun, sans-serif;
         }
 
-        /* 为body添加伪元素 */
         body::before {
             content: "";
             position: absolute;
@@ -62,15 +61,13 @@
             z-index: 3;
         }
 
-        /* light透明效果 - 导航栏 */
+        /* 透明效果 - 导航栏 */
         .navbar-blur-mode {
             background: transparent !important;
             background: rgba(255, 255, 255, .9rem) !important;
             backdrop-filter: blur(8px) !important;
             -webkit-backdrop-filter: blur(8px) !important;
         }
-
-
 
         /* 侧边栏 */
         .sidebar {
@@ -79,7 +76,7 @@
             z-index: 2;
         }
 
-        /* light透明效果 - 侧边栏 */
+        /* 透明效果 - 侧边栏 */
         .sidebar-blur-mode {
             background: transparent !important;
             background: rgba(255, 255, 255, .9rem) !important;
@@ -135,7 +132,8 @@
             overflow-y: auto;
             background-color: transparent;
             padding: .3125rem;
-            max-height: calc(100vh - 188px)
+            max-height: calc(100vh - 11.75rem);
+            min-height: calc(100vh - 11.75rem);
         }
 
         /* 直播中用户的样式 */
@@ -231,8 +229,6 @@
         .dark-mode .navbar-toggler-icon {
             filter: invert(1);
         }
-
-
 
         /* 下拉菜单深色模式样式 */
         .dark-mode .dropdown-menu,
@@ -344,16 +340,13 @@
         const setTheme = (theme) => {
             const isDark = theme === 'dark';
             body.classList.toggle('dark-mode', isDark);
-            navbar.classList.toggle('bg-light', !isDark);
-            navbar.classList.toggle('navbar-light', !isDark);
-            navbar.classList.toggle('bg-dark', isDark);
-            navbar.classList.toggle('navbar-dark', isDark);
+            navbar.classList.replace(isDark ? 'bg-light' : 'bg-dark', isDark ? 'bg-dark' : 'bg-light');
+            navbar.classList.replace(isDark ? 'navbar-light' : 'navbar-dark', isDark ? 'navbar-dark' : 'navbar-light');
             themeIcon.src = isDark ? "./assets/img/moon-stars-fill.svg" : "./assets/img/sun-fill.svg";
             themeIcon.className = isDark ? 'theme-icon-dark' : 'theme-icon-light';
             dropdownIcons.forEach(icon => icon.className = isDark ? 'dropdown-icon-dark' : 'dropdown-icon-light');
             localStorage.setItem('theme', theme);
         };
-
         // 切换透明效果
         function toggleBlurEffect() {
             const isChecked = document.getElementById('blurEffectToggle').checked;
@@ -507,17 +500,12 @@
 
         // 搜索框
         function filterUsers() {
-            const searchInput = document.getElementById('userSearch');
-            const filter = searchInput.value.toLowerCase();
-            const userItems = document.getElementById('user-list').getElementsByClassName('user-item');
+            const filter = document.getElementById('userSearch').value.toLowerCase();
+            const userItems = userList.getElementsByClassName('user-item');
 
-            for (let i = 0; i < userItems.length; i++) {
-                let userName = userItems[i].textContent || userItems[i].innerText;
-                if (userName.toLowerCase().indexOf(filter) > -1) {
-                    userItems[i].style.display = "";
-                } else {
-                    userItems[i].style.display = "none";
-                }
+            for (const item of userItems) {
+                const isVisible = item.textContent.toLowerCase().includes(filter);
+                item.style.display = isVisible ? "" : "none";
             }
         }
 
