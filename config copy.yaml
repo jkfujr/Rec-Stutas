@@ -1,0 +1,40 @@
+# 录播姬(rectpye)
+RECHEME:
+  # (可选)全局 是否启用录播姬认证。如果没有该选项，就默认为 false
+  # 默认为 false
+  RECHEME_BASIC: false
+  # (可选)全局 录播姬认证账号密码。如果没有该选项，就默认为 空
+  # 默认为 空
+  RECHEME_BASIC_USER: "admin"
+  RECHEME_BASIC_PASS: "admin"
+
+  # 名称，没有限制
+  Z9001:
+    # 录播姬地址
+    - URL: http://10.0.0.101:11919
+      # (可选) 是否启用认证，如果没有就使用 RECHEME 全局设置
+      BASIC: true
+      # (可选)认证账号密码，如果没有就使用 RECHEME 全局设置
+      BASIC_USER: "admin"
+      BASIC_PASS: "admin"
+
+
+# BLREC(rectpye)
+BLREC:
+  # (可选)BLREC全局设置 是否启用BLREC认证。如果没有该选项，就默认为 true
+  # 默认为 true
+  BLREC_BASIC: true
+  # (可选)BLREC全局设置 BLREC认证账号密码。如果没有该选项，就默认为 bili2233
+  # 默认为 bili2233
+  BLREC_BASIC_KEY: "88888888"
+
+  # 名称，没有限制
+  Z9101:
+    # BLREC地址
+    - URL: http://10.0.0.101:9101
+      # (可选) 是否启用认证，如果没有就使用BLREC全局设置
+      BASIC: true
+      # (可选)认证密码，如果没有就使用BLREC全局设置
+      BASIC_KEY: "88888888"
+  Z9102:
+    - URL: http://10.0.0.101:9102

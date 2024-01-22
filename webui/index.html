@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>录播状态</title>
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 响应式 */
+        @media (max-width: 48rem) {
+            #main-container {
+                flex-direction: column;
+            }
+
+            #user-list,
+            #details {
+                max-height: 50vh;
+                min-width: 100%;
+            }
+        }
+
+        /* 基础样式 */
+        html {
+            color: #1F2021;
+        }
+
+        body {
+            position: relative;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", STHeiti, "Microsoft YaHei", SimSun, sans-serif;
+        }
+
+        /* 为body添加伪元素 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://t.mwm.moe/ycy/');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        #main-container {
+            display: flex;
+            height: auto;
+            min-height: 100%;
+            overflow: hidden;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+            z-index: 3;
+        }
+
+        /* light透明效果 - 导航栏 */
+        .navbar-blur-mode {
+            background: transparent !important;
+            background: rgba(255, 255, 255, .9rem) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
+
+
+
+        /* 侧边栏 */
+        .sidebar {
+            background-color: #f5f5f5;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, .15);
+            z-index: 2;
+        }
+
+        /* light透明效果 - 侧边栏 */
+        .sidebar-blur-mode {
+            background: transparent !important;
+            background: rgba(255, 255, 255, .9rem) !important;
+            backdrop-filter: saturate(150%) blur(12px) !important;
+        }
+
+        /* 搜索框样式 */
+        .search-container {
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            padding: 5px;
+            background-color: transparent;
+            z-index: 100;
+        }
+
+        #userSearch {
+            width: 100%;
+            padding: .3125rem;
+            margin-bottom: .3125rem;
+            border: .0625rem solid #dddddd;
+            border-radius: .25rem;
+            background-color: transparent;
+            color: black;
+        }
+
+        /* 用户统计信息样式 */
+        .user-stats {
+            padding: .3125rem;
+            background-color: transparent;
+            border-radius: .125rem;
+            margin-bottom: .3125rem;
+            text-align: center;
+        }
+
+        .user-stats p {
+            margin-bottom: 0rem;
+            font-size: 1.375rem !important;
+        }
+
+        /* 用户列表样式 */
+        .user-item {
+            cursor: pointer;
+            padding: .3125rem;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        #user-list {
+            flex: 0 0 auto;
+            min-width: max-content;
+            overflow-y: auto;
+            background-color: transparent;
+            padding: .3125rem;
+            max-height: calc(100vh - 188px)
+        }
+
+        /* 直播中用户的样式 */
+        .streaming {
+            border: .0625rem solid #dc6565;
+            border-radius: .625rem;
+            box-shadow: 0 .125rem .25rem #00000033;
+        }
+
+        /* 图标样式 */
+        .recheme-icon,
+        .blrec-icon {
+            width: 1rem;
+            height: 1rem;
+            margin-right: .3125rem;
+            border-radius: 50%;
+        }
+
+        .recheme-icon {
+            background-color: #1C9BCD;
+        }
+
+        .blrec-icon {
+            background-color: #F85B64;
+        }
+
+        /* 详情区域 */
+        .details {
+            flex-grow: 1;
+            max-height: calc(100vh - 56px);
+            overflow-y: auto;
+            background-color: #f5f5f5;
+            padding: .625rem;
+            color: #1F2021;
+            z-index: 1;
+        }
+
+        /* light透明效果 - 详情区域 */
+        .details-blur-mode {
+            background: transparent !important;
+        }
+
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: .625rem;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #E4E4E5;
+        }
+
+        .dark-mode ::-webkit-scrollbar-track {
+            background: #343941;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0088FF;
+            border-radius: .3125rem;
+        }
+
+        .dark-mode ::-webkit-scrollbar-thumb {
+            background: #0088FF;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1A94FF;
+        }
+
+        .dark-mode ::-webkit-scrollbar-thumb:hover {
+            background: #1A94FF;
+        }
+
+        /* 深色模式下的样式 */
+        .dark-mode {
+            background-color: #1F2021;
+            color: #ffffff;
+        }
+
+        .dark-mode #sidebar,
+        .dark-mode #details {
+            background-color: #1F2021;
+            color: #ffffff;
+        }
+
+        .dark-mode .navbar,
+        .dark-mode .navbar-light .navbar-nav .nav-link,
+        .dark-mode .navbar-light .navbar-nav .nav-link:hover {
+            background-color: #1F2021;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .dark-mode .navbar-toggler-icon {
+            filter: invert(1);
+        }
+
+
+
+        /* 下拉菜单深色模式样式 */
+        .dark-mode .dropdown-menu,
+        .dark-mode .dropdown-menu .dropdown-item,
+        .dark-mode .dropdown-menu .dropdown-item:hover,
+        .dark-mode .dropdown-menu .dropdown-item:focus {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+
+        /* 图标颜色样式 */
+        .theme-icon-light,
+        .dropdown-icon-light {
+            filter: invert(0%);
+        }
+
+        .theme-icon-dark,
+        .dropdown-icon-dark {
+            filter: invert(100%);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">录播状态</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="/api/data">API喵</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">GitHub喵(还没有喵)</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">测试中喵</a></li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="btn btn-outline-secondary" href="#" id="themeDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <img id="themeIcon" src="./assets/img/sun-fill.svg" alt="Theme Icon"
+                                    style="width: 1.25rem; height: 1.25rem;">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
+                                <li><a class="dropdown-item" onclick="setTheme('light')">
+                                        <img src="./assets/img/sun-fill.svg" alt="Sun Icon"
+                                            style="width: 1.25rem; height: 1.25rem; margin-right: .3125rem;">Light
+                                    </a></li>
+                                <li><a class="dropdown-item" onclick="setTheme('dark')">
+                                        <img src="./assets/img/moon-stars-fill.svg" alt="Moon Icon"
+                                            style="width: 1.25rem; height: 1.25rem; margin-right: .3125rem;">Dark
+                                    </a></li>
+                                <li>
+                                    <a class="dropdown-item">
+                                        <input type="checkbox" id="blurEffectToggle" onchange="toggleBlurEffect()">
+                                        <label for="blurEffectToggle">毛玻璃</label>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container-fluid">
+        <div class="row" id="main-container">
+            <!-- 侧边栏 -->
+            <div class="sidebar col-md-3" id="sidebar">
+                <!-- 搜索框 -->
+                <div class="search-container" id="search-container">
+                    <input type="text" id="userSearch" placeholder="搜索用户..." onkeyup="filterUsers()">
+                </div>
+                <!-- 状态栏 -->
+                <div id="user-stats" class="user-stats">
+                    <p>监控中 <span id="total-users">0</span></p>
+                    <p>直播中 <span id="streaming-users">0</span></p>
+                </div>
+                <!-- 用户列表内容 -->
+                <div id="user-list"></div>
+            </div>
+            <!-- 详细信息区域 -->
+            <section class="details col-md-9" id="details">
+                点击左侧用户名以查看详情。
+            </section>
+        </div>
+    </main>
+
+    <script src="./assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 常用缓存
+        const body = document.body;
+        const navbar = document.querySelector('.navbar');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const dropdownIcons = document.querySelectorAll('.dropdown-menu img');
+        const details = document.getElementById('details');
+        const userList = document.getElementById('user-list');
+
+        // 主题切换函数
+        const setTheme = (theme) => {
+            const isDark = theme === 'dark';
+            body.classList.toggle('dark-mode', isDark);
+            navbar.classList.toggle('bg-light', !isDark);
+            navbar.classList.toggle('navbar-light', !isDark);
+            navbar.classList.toggle('bg-dark', isDark);
+            navbar.classList.toggle('navbar-dark', isDark);
+            themeIcon.src = isDark ? "./assets/img/moon-stars-fill.svg" : "./assets/img/sun-fill.svg";
+            themeIcon.className = isDark ? 'theme-icon-dark' : 'theme-icon-light';
+            dropdownIcons.forEach(icon => icon.className = isDark ? 'dropdown-icon-dark' : 'dropdown-icon-light');
+            localStorage.setItem('theme', theme);
+        };
+
+        // 切换透明效果
+        function toggleBlurEffect() {
+            const isChecked = document.getElementById('blurEffectToggle').checked;
+            localStorage.setItem('blurEffect', isChecked);
+            applyBlurEffect(isChecked);
+        }
+
+        // 应用透明效果
+        function applyBlurEffect(enabled) {
+            const navbar = document.querySelector('.navbar');
+            const sidebar = document.getElementById('sidebar');
+            const details = document.getElementById('details');
+
+            navbar.classList.toggle('navbar-blur-mode', enabled);
+            sidebar.classList.toggle('sidebar-blur-mode', enabled);
+            details.classList.toggle('details-blur-mode', enabled);
+        }
+
+        // 页面加载时应用保存的主题设置
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const blurEffectEnabled = localStorage.getItem('blurEffect') === 'true';
+            document.getElementById('blurEffectToggle').checked = blurEffectEnabled;
+            setTheme(savedTheme);
+            applyBlurEffect(blurEffectEnabled);
+        });
+
+
+        // 获取并显示房间数据
+        const fetchRoomData = async (roomId, rectpye) => {
+            try {
+                const response = await fetch(`/api/data/${rectpye}/${roomId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // 假设数据在data属性下，根据你的实际数据结构调整
+                displayUserData(data.data[0]);
+            } catch (error) {
+                console.error('Error fetching room data:', error);
+                details.innerHTML = `<p>无法加载数据: ${error.message}</p>`;
+            }
+        };
+
+        // 格式化并展示用户数据
+        function displayUserData(userData) {
+            let formattedData = '';
+            if (userData.rectpye === 'recheme') {
+                formattedData = formatRechemeData(userData);
+            } else if (userData.rectpye === 'blrec') {
+                formattedData = formatBlrecData(userData);
+            }
+
+            const rawData = JSON.stringify(userData, null, 2);
+            details.innerHTML = `
+        <div class="formatted-data">${formattedData}</div>
+        <details>
+            <summary>原始数据</summary>
+            <pre><code>${rawData}</code></pre>
+        </details>
+    `;
+        }
+
+        // 格式化'recheme'类型的数据
+        function formatRechemeData(data) {
+            return `
+        <div class="data-item">${data.title}</div>
+        <hr>
+        <div class="data-item">${data.name} · <a href="https://live.bilibili.com/${data.roomId}" target="_blank">${data.roomId}</a></div>
+        <div class="data-item">${data.areaNameParent} - ${data.areaNameChild}</div>
+        <div class="data-item">UID <a href="https://space.bilibili.com/${data.uid}" target="_blank">${data.uid}</a></div>
+        <div class="data-item">直播状态 ${data.streaming ? '🥰' : '😭'}</div>
+        <div class="data-item">自动录播 ${data.autoRecord ? '🥰' : '😭'}</div>
+    `;
+        }
+
+
+        // 格式化'blrec'类型的数据
+        function formatBlrecData(data) {
+            return `
+        <div class="data-item">${data.room_info.title}</div>
+        <hr>
+        <div class="data-item">${data.user_info.name}·${data.room_info.room_id}</div>
+        <div class="data-item">UID: ${data.user_info.uid}</div>
+        <div class="data-item">主播类型: ${data.room_info.parent_area_name} - ${data.room_info.area_name}</div>
+
+        <div class="data-item">是否正在直播: ${data.room_info.live_status === 1 ? '🥰' : '😭'}</div>
+        <div class="data-item">在线人数: ${data.room_info.online}</div>
+    `;
+        }
+
+
+
+        // 判断是否正在直播
+        const isStreaming = (user) => {
+            if (user.rectpye === 'recheme') {
+                return user.streaming;
+            } else if (user.rectpye === 'blrec') {
+                return user.room_info.live_status === 1;
+            }
+            return false;
+        };
+
+        // 比较函数，用于排序
+        const compareUsers = (a, b) => {
+            const streamingA = isStreaming(a) ? 0 : 1;
+            const streamingB = isStreaming(b) ? 0 : 1;
+
+            if (streamingA !== streamingB) {
+                return streamingA - streamingB;
+            }
+
+            const nameA = a.rectpye === 'recheme' ? a.name : a.user_info.name;
+            const nameB = b.rectpye === 'recheme' ? b.name : b.user_info.name;
+            return nameA.localeCompare(nameB, ['en', 'ja', 'zh-Hans-CN'], { sensitivity: 'accent' });
+        };
+
+        // 加载用户列表
+        const loadUserList = async () => {
+            const response = await fetch('/api/data');
+            const { data } = await response.json();
+            data.sort(compareUsers);
+
+            // 更新用户统计信息
+            document.getElementById('total-users').textContent = data.length;
+
+            // 创建一个集合存储直播中的独特用户名
+            const streamingUsersSet = new Set();
+            data.forEach(user => {
+                if (isStreaming(user)) {
+                    const name = user.rectpye === 'recheme' ? user.name : user.user_info.name;
+                    streamingUsersSet.add(name);
+                }
+            });
+
+            // 更新用户统计信息
+            document.getElementById('total-users').textContent = data.length;
+            const streamingCount = data.filter(user => isStreaming(user)).length;
+            document.getElementById('streaming-users').textContent = streamingUsersSet.size;
+            userList.innerHTML = data.map(user => {
+                const name = user.rectpye === 'recheme' ? user.name : user.user_info.name;
+                const iconClass = user.rectpye === 'recheme' ? 'recheme-icon' : 'blrec-icon';
+                const streamingClass = isStreaming(user) ? 'streaming' : '';
+                return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${user.rectpye === 'recheme' ? user.roomId : user.room_info.room_id}', '${user.rectpye}')">
+                        <div class="${iconClass}"></div>${name}
+                    </div>`;
+            }).join('');
+        };
+        loadUserList();
+
+        // 搜索框
+        function filterUsers() {
+            const searchInput = document.getElementById('userSearch');
+            const filter = searchInput.value.toLowerCase();
+            const userItems = document.getElementById('user-list').getElementsByClassName('user-item');
+
+            for (let i = 0; i < userItems.length; i++) {
+                let userName = userItems[i].textContent || userItems[i].innerText;
+                if (userName.toLowerCase().indexOf(filter) > -1) {
+                    userItems[i].style.display = "";
+                } else {
+                    userItems[i].style.display = "none";
+                }
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
