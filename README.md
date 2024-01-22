@@ -1,6 +1,6 @@
 # 简介
 
-![截图_2024-01-22_17-14-21](https://raw.githubusercontent.com/jkfujr/Rec-Stutas/main/%E6%88%AA%E5%9B%BE_2024-01-22_17-14-21.png)
+![截图_2024-01-22_17-14-21](https://raw.githubusercontent.com/jkfujr/Rec-Stutas/main/%E6%88%AA%E5%9B%BE_1.png)
 
 
 一个用 python 实现的"多"录播姬/BLREC命令行简单的信息展示
