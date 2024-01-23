@@ -42,7 +42,6 @@ def fetch_data() -> List[Dict]:
     for rectype, apis in config.items():
         if rectype in ["RECHEME", "BLREC"]:
             for api_key, api_info_list in apis.items():
-                # 确保 api_info_list 是一个列表
                 if isinstance(api_info_list, list):
                     for api_info in api_info_list:
                         api_info.update({"rectpye": rectype.lower()})
