@@ -15,36 +15,25 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 ### 日志模块
-# 日志文件夹路径和日志文件名
-log_folder = "logs"
-log_file_path = os.path.join(os.path.dirname(__file__), log_folder, "log.log")
-
-# 确保日志文件夹存在
-if not os.path.exists(log_folder):
-    os.makedirs(log_folder)
-
-# 创建日志记录器
+# 获取所在的目录
+script_directory = os.path.dirname(__file__)
+log_directory = os.path.join(script_directory, "logs")
+os.makedirs(log_directory, exist_ok=True)
+# 配置日志记录器
+log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] - %(message)s")
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-
-# 文件处理器，保留30天的日志
-file_handler = TimedRotatingFileHandler(
-    log_file_path, when="midnight", interval=1, encoding="utf-8", backupCount=30
+# 按日期分割日志文件并保留30天
+log_file_handler = TimedRotatingFileHandler(
+    os.path.join(log_directory, "log.log"),
+    when="D",
+    interval=1,
+    backupCount=30,
+    encoding="utf-8",
 )
-file_handler.setFormatter(
-    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-)
-file_handler.setLevel(logging.DEBUG)
-file_handler.suffix = "%Y-%m-%d.log"
-logger.addHandler(file_handler)
-
-# 控制台处理器
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(
-    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-)
-logger.addHandler(console_handler)
+log_file_handler.setFormatter(log_formatter)
+if not logger.handlers:
+    logger.addHandler(log_file_handler)
 
 
 ### 配置文件模块
@@ -82,7 +71,12 @@ app.mount("/assets", StaticFiles(directory="./webui/assets"), name="assets")
 templates = Jinja2Templates(directory="webui")
 
 
+# 全局缓存数据
 cached_data = None
+
+
+# 全局Session对象
+session = requests.Session()
 
 
 # API数据请求
@@ -111,7 +105,7 @@ def fetch_api_data(api_info: Dict) -> List[Dict]:
     )
     logger.debug(f"请求API URL: {url}")
     try:
-        response = requests.get(url, headers=get_headers(api_info), timeout=3)
+        response = session.get(url, headers=get_headers(api_info), timeout=3)
         logger.debug(f"响应状态码: {response.status_code}, URL: {url}")
         if response.status_code == 200:
             data = response.json()
@@ -148,7 +142,7 @@ def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
                 continue
 
             logger.debug(f"请求单条数据URL: {url}")
-            response = requests.get(
+            response = session.get(
                 url, headers=get_headers({"rectpye": data["rectpye"]})
             )
             if response.status_code == 200:
@@ -191,11 +185,13 @@ def get_headers(api_info: Dict) -> Dict:
     return headers
 
 
+# webui端点
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+# 获取所有数据
 @app.get("/api/data")
 async def get_all_data():
     logger.info(f'调用路径 @app.get("/api/data")')
