@@ -64,7 +64,6 @@ def load_config():
     config.setdefault("BLREC_BASIC", True)
     config.setdefault("BLREC_BASIC_KEY", "bili2233")
 
-
     return config
 
 
@@ -82,8 +81,6 @@ templates = Jinja2Templates(directory="webui")
 
 
 ### 一些全局变量
-# 配置文件
-config = load_config()
 # 数据缓存
 cached_data = None
 # 全局Session对象
@@ -119,6 +116,31 @@ def build_request_headers(api_info: Dict) -> Dict:
     return headers
 
 
+# 请求API返回数据
+def perform_api_request(url: str, headers: Dict) -> List[Dict]:
+    """
+    执行对 API 的请求并返回数据。
+    :param url: API的URL地址。
+    :param headers: 请求头。
+    :return: API返回的数据列表。
+    """
+    try:
+        response = session.get(url, headers=headers, timeout=3)
+        if response.status_code == 200:
+            data = response.json()
+            logger.debug(f"从 {url} 获取到数据: {len(data)} 条")
+            return data
+        else:
+            logger.error(f"请求失败，状态码: {response.status_code}, URL: {url}")
+            return []
+    except requests.exceptions.Timeout:
+        logger.error(f"请求超时, URL: {url}")
+        return []
+    except Exception as e:
+        logger.error(f"请求异常: {e}, URL: {url}")
+        return []
+
+
 # 请求所有直播间的数据
 def fetch_api_data(api_info: Dict) -> List[Dict]:
     """
@@ -131,32 +153,12 @@ def fetch_api_data(api_info: Dict) -> List[Dict]:
         if api_info["rectpye"] == "recheme"
         else f"{api_info['URL']}/api/v1/tasks/data"
     )
-    logger.debug(f"请求API URL: {url}")
-
     headers = build_request_headers(api_info)
+    api_data = perform_api_request(url, headers)
 
-    try:
-        response = session.get(url, headers=headers, timeout=3)
-        logger.debug(f"响应状态码: {response.status_code}, URL: {url}")
-
-        if response.status_code == 200:
-            data = response.json()
-            logger.debug(f"获取到的数据数量: {len(data)}, URL: {url}")
-
-            for item in data:
-                item.update(
-                    {"rectpye": api_info["rectpye"], "base_url": api_info["URL"]}
-                )
-            return data
-        else:
-            logger.error(f"请求失败, 状态码: {response.status_code}, URL: {url}")
-            return []
-    except requests.exceptions.Timeout:
-        logger.error(f"请求超时, URL: {url}")
-        return []
-    except Exception as e:
-        logger.error(f"发生异常: {e}, URL: {url}")
-        return []
+    for item in api_data:
+        item.update({"rectpye": api_info["rectpye"], "base_url": api_info["URL"]})
+    return api_data
 
 
 # 请求特定直播间的数据
@@ -180,19 +182,13 @@ def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
             else:
                 continue
 
-            logger.debug(f"请求单条数据URL: {url}")
-
             headers = build_request_headers({"rectpye": data["rectpye"]})
-
-            response = session.get(url, headers=headers)
-            if response.status_code == 200:
-                single_room_data = response.json()
+            single_room_data = perform_api_request(url, headers)
+            if single_room_data:
                 single_room_data.update(
                     {"rectpye": data["rectpye"], "base_url": data["base_url"]}
                 )
                 room_data.append(single_room_data)
-            else:
-                logger.error(f"请求失败: {url}, 状态码: {response.status_code}")
     return room_data
 
 
@@ -242,7 +238,7 @@ async def get_room_by_id(roomId: int):
     return {"data": room_data}
 
 
-# 获取 recheme 所有数据
+# 获取 录播姬 所有数据
 @app.get("/api/data/recheme")
 async def get_recheme_data():
     logger.info(f'调用路径 @app.get("/api/data/recheme")')
