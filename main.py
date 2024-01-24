@@ -52,17 +52,18 @@ def load_config():
         logger.error(f"解析配置文件时出现问题: {e}")
         sys.exit(1)
 
-    # 直接从顶层配置中读取HOST和PORT
+    # 配置读取
     config["HOST"] = config.get("HOST", "127.0.0.1")
     config["PORT"] = int(config.get("PORT", 11111))
-    logger.debug(f"全局配置读取：HOST={config['HOST']}, PORT={config['PORT']}")
-    
+    logger.debug(f"配置读取：HOST={config['HOST']}, PORT={config['PORT']}")
+
     # 默认值设置
     config.setdefault("RECHEME_BASIC", False)
     config.setdefault("RECHEME_BASIC_USER", "")
     config.setdefault("RECHEME_BASIC_PASS", "")
     config.setdefault("BLREC_BASIC", True)
     config.setdefault("BLREC_BASIC_KEY", "bili2233")
+
 
     return config
 
