@@ -19,10 +19,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 script_directory = os.path.dirname(__file__)
 log_directory = os.path.join(script_directory, "logs")
 os.makedirs(log_directory, exist_ok=True)
+
 # 配置日志记录器
 log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] - %(message)s")
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
+
 # 按日期分割日志文件并保留30天
 log_file_handler = TimedRotatingFileHandler(
     os.path.join(log_directory, "log.log"),
@@ -49,12 +51,18 @@ def load_config():
         logger.error(f"解析配置文件时出现问题: {e}")
         sys.exit(1)
 
-    # 全局默认值
+    # 新增的全局配置读取
+    global_config = config.get('global', {})
+    config['HOST'] = global_config.get('HOST', '127.0.0.1')
+    config['PORT'] = int(global_config.get('PORT', 11111))
+
+    # 现有的默认值设置
     config.setdefault("RECHEME_BASIC", False)
     config.setdefault("RECHEME_BASIC_USER", "")
     config.setdefault("RECHEME_BASIC_PASS", "")
     config.setdefault("BLREC_BASIC", True)
     config.setdefault("BLREC_BASIC_KEY", "bili2233")
+
 
     return config
 
@@ -71,7 +79,7 @@ app.mount("/assets", StaticFiles(directory="./webui/assets"), name="assets")
 templates = Jinja2Templates(directory="webui")
 
 
-# 全局缓存数据
+# 数据缓存
 cached_data = None
 
 
@@ -97,6 +105,7 @@ def fetch_data() -> List[Dict]:
     return all_data
 
 
+# 请求所有数据
 def fetch_api_data(api_info: Dict) -> List[Dict]:
     url = (
         f"{api_info['URL']}/api/room"
@@ -126,7 +135,7 @@ def fetch_api_data(api_info: Dict) -> List[Dict]:
         return []
 
 
-# 处理不同类型的房间ID
+# 单独请求数据
 def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
     room_data = []
     for data in cached_data:
@@ -262,10 +271,11 @@ async def get_blrec_room_by_id(roomId: int):
 
 
 if __name__ == "__main__":
+    config = load_config()
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=11111,
+        host=config['HOST'],
+        port=config['PORT'],
         log_level="info",
         reload=True,
     )

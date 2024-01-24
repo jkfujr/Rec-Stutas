@@ -419,11 +419,12 @@
             return `
         <div class="data-item">${data.title}</div>
         <hr>
-        <div class="data-item">${data.name} · <a href="https://live.bilibili.com/${data.roomId}" target="_blank">${data.roomId}</a></div>
-        <div class="data-item">${data.areaNameParent} - ${data.areaNameChild}</div>
-        <div class="data-item">UID <a href="https://space.bilibili.com/${data.uid}" target="_blank">${data.uid}</a></div>
+        <div class="data-item"><a href="https://space.bilibili.com/${data.uid}" target="_blank">${data.name}</a> · <a href="https://live.bilibili.com/${data.roomId}" target="_blank">${data.roomId}</a></div>
+        <div class="data-item">${data.areaNameParent} · ${data.areaNameChild}</div>
         <div class="data-item">直播状态 ${data.streaming ? '🥰' : '😭'}</div>
+        <div class="data-item">录制状态 ${data.recording ? '🥰' : '😭'}</div>
         <div class="data-item">自动录播 ${data.autoRecord ? '🥰' : '😭'}</div>
+        <div class="data-item">流服务器 ${data.ioStats.streamHost}</div>
     `;
         }
 
@@ -433,12 +434,13 @@
             return `
         <div class="data-item">${data.room_info.title}</div>
         <hr>
-        <div class="data-item">${data.user_info.name}·${data.room_info.room_id}</div>
-        <div class="data-item">UID: ${data.user_info.uid}</div>
-        <div class="data-item">主播类型: ${data.room_info.parent_area_name} - ${data.room_info.area_name}</div>
-
-        <div class="data-item">是否正在直播: ${data.room_info.live_status === 1 ? '🥰' : '😭'}</div>
-        <div class="data-item">在线人数: ${data.room_info.online}</div>
+        <div class="data-item"><a href="https://space.bilibili.com/${data.user_info.uid}" target="_blank">${data.user_info.name}</a> · <a href="https://live.bilibili.com/${data.room_info.room_id}" target="_blank">${data.room_info.room_id}</a></div>
+        <div class="data-item">${data.room_info.parent_area_name} · ${data.room_info.area_name}</div>
+        <div class="data-item">直播状态 ${data.room_info.live_status === 1 ? '🥰' : '😭'}</div>
+        <div class="data-item">录制状态 ${data.task_status.running_status === "recording" ? '🥰' : '😭'}</div>
+        <div class="data-item">自动录播 ${data.task_status.recorder_enabled ? '🥰' : '😭'}</div>
+        <div class="data-item">流服务器 ${data.task_status.stream_host}</div>
+        <div class="data-item">在线人数 ${data.room_info.online}</div>
     `;
         }
 
