@@ -1,5 +1,6 @@
 __pycache__/
 .vscode
+Rec-Stutas
 logs
 * copy.*
 config.yaml
