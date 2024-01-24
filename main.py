@@ -88,38 +88,59 @@ cached_data = None
 session = requests.Session()
 
 
-# API数据请求
-def fetch_data() -> List[Dict]:
-    all_data = []
-    for rectype, apis in config.items():
-        if rectype in ["RECHEME", "BLREC"]:
-            for api_key, api_info_list in apis.items():
-                if isinstance(api_info_list, list):
-                    for api_info in api_info_list:
-                        api_info.update({"rectpye": rectype.lower()})
-                        logger.debug(f"开始获取数据, API信息: {api_info}")
-                        api_data = fetch_api_data(api_info)
-                        all_data.extend(api_data)
-                        logger.debug(f"已获取数据, 数据数量: {len(api_data)}")
+# 根据API信息构建请求头
+def build_request_headers(api_info: Dict) -> Dict:
+    headers = {}
+    rectype = api_info["rectpye"]
 
-    logger.debug(f"总数据量: {len(all_data)}")
-    return all_data
+    if rectype == "blrec":
+        api_key = api_info.get(
+            "BASIC_KEY", config.get("BLREC", {}).get("BLREC_BASIC_KEY", "")
+        )
+        headers["x-api-key"] = api_key
+        logger.debug("BLREC请求头构建完毕: %s", api_key)
+    elif rectype == "recheme":
+        if api_info.get("BASIC", config.get("RECHEME", {}).get("RECHEME_BASIC", False)):
+            user = api_info.get(
+                "BASIC_USER", config.get("RECHEME", {}).get("RECHEME_BASIC_USER", "")
+            )
+            password = api_info.get(
+                "BASIC_PASS", config.get("RECHEME", {}).get("RECHEME_BASIC_PASS", "")
+            )
+            auth_str = f"{user}:{password}"
+            encoded_credentials = base64.b64encode(auth_str.encode("utf-8")).decode(
+                "utf-8"
+            )
+            headers["Authorization"] = f"Basic {encoded_credentials}"
+            logger.debug("录播姬请求头构建完毕: %s", auth_str)
+
+    return headers
 
 
-# 请求所有数据
+# 请求所有直播间的数据
 def fetch_api_data(api_info: Dict) -> List[Dict]:
+    """
+    请求所有直播间的数据。
+    :param api_info: 包含API详细信息的字典。
+    :return: 从API获取的数据列表。
+    """
     url = (
         f"{api_info['URL']}/api/room"
         if api_info["rectpye"] == "recheme"
         else f"{api_info['URL']}/api/v1/tasks/data"
     )
     logger.debug(f"请求API URL: {url}")
+
+    headers = build_request_headers(api_info)
+
     try:
-        response = session.get(url, headers=get_headers(api_info), timeout=3)
+        response = session.get(url, headers=headers, timeout=3)
         logger.debug(f"响应状态码: {response.status_code}, URL: {url}")
+
         if response.status_code == 200:
             data = response.json()
             logger.debug(f"获取到的数据数量: {len(data)}, URL: {url}")
+
             for item in data:
                 item.update(
                     {"rectpye": api_info["rectpye"], "base_url": api_info["URL"]}
@@ -136,8 +157,14 @@ def fetch_api_data(api_info: Dict) -> List[Dict]:
         return []
 
 
-# 单独请求数据
+# 请求特定直播间的数据
 def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
+    """
+    请求特定直播间的数据。
+    :param room_id: 直播间ID。
+    :param rectpye: 数据类型（recheme或blrec）。
+    :return: 直播间数据列表。
+    """
     room_data = []
     for data in cached_data:
         if rectpye is None or data["rectpye"] == rectpye:
@@ -152,9 +179,10 @@ def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
                 continue
 
             logger.debug(f"请求单条数据URL: {url}")
-            response = session.get(
-                url, headers=get_headers({"rectpye": data["rectpye"]})
-            )
+
+            headers = build_request_headers({"rectpye": data["rectpye"]})
+
+            response = session.get(url, headers=headers)
             if response.status_code == 200:
                 single_room_data = response.json()
                 single_room_data.update(
@@ -166,33 +194,22 @@ def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
     return room_data
 
 
-# 请求头
-def get_headers(api_info: Dict) -> Dict:
-    headers = {}
-    rectype = api_info["rectpye"]
+# API数据请求
+def fetch_data() -> List[Dict]:
+    all_data = []
+    for rectype, apis in config.items():
+        if rectype in ["RECHEME", "BLREC"]:
+            for api_key, api_info_list in apis.items():
+                if isinstance(api_info_list, list):
+                    for api_info in api_info_list:
+                        api_info.update({"rectpye": rectype.lower()})
+                        logger.debug(f"开始获取数据, API信息: {api_info}")
+                        api_data = fetch_api_data(api_info)
+                        all_data.extend(api_data)
+                        logger.debug(f"已获取数据, 数据数量: {len(api_data)}")
 
-    if rectype == "blrec":
-        api_key = api_info.get(
-            "BASIC_KEY", config.get("BLREC", {}).get("BLREC_BASIC_KEY", "")
-        )
-        headers["x-api-key"] = api_key
-        logger.debug(f"BLREC请求头: {api_key}")
-    elif rectype == "recheme":
-        if api_info.get("BASIC", config.get("RECHEME", {}).get("RECHEME_BASIC", False)):
-            user = api_info.get(
-                "BASIC_USER", config.get("RECHEME", {}).get("RECHEME_BASIC_USER", "")
-            )
-            password = api_info.get(
-                "BASIC_PASS", config.get("RECHEME", {}).get("RECHEME_BASIC_PASS", "")
-            )
-            auth_str = f"{user}:{password}"
-            encoded_credentials = base64.b64encode(auth_str.encode("utf-8")).decode(
-                "utf-8"
-            )
-            headers["Authorization"] = f"Basic {encoded_credentials}"
-            logger.debug(f"录播姬请求头: {auth_str}")
-
-    return headers
+    logger.debug(f"总数据量: {len(all_data)}")
+    return all_data
 
 
 # webui端点
