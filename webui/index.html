@@ -160,7 +160,8 @@
         }
 
         .blrec-icon {
-            background-image: url('./assets/img/blrec.png');            /* 设置blrec图标 */
+            background-image: url('./assets/img/blrec.png');
+            /* 设置blrec图标 */
         }
 
 
@@ -383,17 +384,17 @@
             try {
                 const response = await fetch(`/api/data/${rectpye}/${roomId}`);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`请求失败: ${response.status}`);
                 }
                 const data = await response.json();
 
-                // 假设数据在data属性下，根据你的实际数据结构调整
                 displayUserData(data.data[0]);
             } catch (error) {
-                console.error('Error fetching room data:', error);
+                console.error('加载房间数据错误:', error);
                 details.innerHTML = `<p>无法加载数据: ${error.message}</p>`;
             }
         };
+
 
         // 格式化并展示用户数据
         function displayUserData(userData) {
@@ -427,8 +428,6 @@
         <div class="data-item">流服务器 ${data.ioStats.streamHost}</div>
     `;
         }
-
-
         // 格式化'blrec'类型的数据
         function formatBlrecData(data) {
             return `
@@ -443,7 +442,6 @@
         <div class="data-item">在线人数 ${data.room_info.online}</div>
     `;
         }
-
 
 
         // 判断是否正在直播
@@ -479,7 +477,6 @@
             // 更新用户统计信息
             document.getElementById('total-users').textContent = data.length;
 
-            // 创建一个集合存储直播中的独特用户名
             const streamingUsersSet = new Set();
             data.forEach(user => {
                 if (isStreaming(user)) {

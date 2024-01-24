@@ -5,7 +5,6 @@ HOST: 127.0.0.1
 # 默认为 11111
 PORT: 11111
 
-
 # 录播姬(rectpye)
 RECHEME:
   # (可选)全局 是否启用录播姬认证。如果没有该选项，就默认为 false
@@ -25,7 +24,6 @@ RECHEME:
       # (可选)认证账号密码，如果没有就使用 RECHEME 全局设置
       BASIC_USER: "admin"
       BASIC_PASS: "admin"
-
 
 # BLREC(rectpye)
 BLREC:

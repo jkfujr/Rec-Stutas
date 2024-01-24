@@ -51,18 +51,17 @@ def load_config():
         logger.error(f"解析配置文件时出现问题: {e}")
         sys.exit(1)
 
-    # 新增的全局配置读取
-    global_config = config.get('global', {})
-    config['HOST'] = global_config.get('HOST', '127.0.0.1')
-    config['PORT'] = int(global_config.get('PORT', 11111))
+    # 全局配置
+    global_config = config.get("global", {})
+    config["HOST"] = global_config.get("HOST", "127.0.0.1")
+    config["PORT"] = int(global_config.get("PORT", 11111))
 
-    # 现有的默认值设置
+    # 默认值设置
     config.setdefault("RECHEME_BASIC", False)
     config.setdefault("RECHEME_BASIC_USER", "")
     config.setdefault("RECHEME_BASIC_PASS", "")
     config.setdefault("BLREC_BASIC", True)
     config.setdefault("BLREC_BASIC_KEY", "bili2233")
-
 
     return config
 
@@ -74,15 +73,17 @@ except Exception as e:
     sys.exit(1)
 
 
+# FastAPI设置
 app = FastAPI()
 app.mount("/assets", StaticFiles(directory="./webui/assets"), name="assets")
 templates = Jinja2Templates(directory="webui")
 
 
+### 一些全局变量
+# 配置文件
+config = load_config()
 # 数据缓存
 cached_data = None
-
-
 # 全局Session对象
 session = requests.Session()
 
@@ -271,11 +272,10 @@ async def get_blrec_room_by_id(roomId: int):
 
 
 if __name__ == "__main__":
-    config = load_config()
     uvicorn.run(
         "main:app",
-        host=config['HOST'],
-        port=config['PORT'],
+        host=config["HOST"],
+        port=config["PORT"],
         log_level="info",
         reload=True,
     )
