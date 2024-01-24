@@ -44,6 +44,7 @@ def load_config():
     try:
         with open("config.yaml", "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
+        logger.debug("配置文件读取成功")
     except FileNotFoundError:
         logger.error("配置文件不存在")
         sys.exit(1)
@@ -51,11 +52,11 @@ def load_config():
         logger.error(f"解析配置文件时出现问题: {e}")
         sys.exit(1)
 
-    # 全局配置
-    global_config = config.get("global", {})
-    config["HOST"] = global_config.get("HOST", "127.0.0.1")
-    config["PORT"] = int(global_config.get("PORT", 11111))
-
+    # 直接从顶层配置中读取HOST和PORT
+    config["HOST"] = config.get("HOST", "127.0.0.1")
+    config["PORT"] = int(config.get("PORT", 11111))
+    logger.debug(f"全局配置读取：HOST={config['HOST']}, PORT={config['PORT']}")
+    
     # 默认值设置
     config.setdefault("RECHEME_BASIC", False)
     config.setdefault("RECHEME_BASIC_USER", "")
