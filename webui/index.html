@@ -72,7 +72,7 @@
         /* 侧边栏 */
         .sidebar {
             background-color: #f5f5f5;
-            box-shadow: .125rem 0 .5rem rgba(0, 0, 0, .15);
+
             z-index: 2;
         }
 
@@ -180,6 +180,38 @@
         .details-blur-mode {
             background: transparent !important;
         }
+
+        /* 分页标签基本样式 */
+        .nav-tabs {
+            border-bottom: none;
+            padding: 0.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #f8f9fa;
+            color: #007bff;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #495057;
+            background-color: #fff;
+            border-color: #ddd #ddd #fff;
+        }
+
+        /* 兼容 blur-mode 的样式 */
+        .dark-mode .nav-tabs .nav-link {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .dark-mode .nav-tabs .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
 
 
         /* 滚动条样式 */
@@ -388,36 +420,68 @@
                 }
                 const data = await response.json();
 
-                displayUserData(data.data[0]);
+                displayUserData(data.data);  // 注意此处传入的是数组
             } catch (error) {
                 console.error('加载房间数据错误:', error);
                 details.innerHTML = `<p>无法加载数据: ${error.message}</p>`;
             }
         };
 
+        // 创建分页标签
+        function createPaginationTabs(data) {
+            const uniqueBaseUrls = [...new Set(data.map(item => item.base_url))];
+            let tabsHtml = '<ul class="nav nav-tabs">';
+            uniqueBaseUrls.forEach((url, index) => {
+                tabsHtml += `
+                    <li class="nav-item">
+                        <a class="nav-link ${index === 0 ? 'active' : ''}" data-bs-toggle="tab" href="#${url}">${url}</a>
+                    </li>`;
+            });
+            tabsHtml += '</ul>';
+            return tabsHtml;
+        }
+
 
         // 格式化并展示用户数据
-        function displayUserData(userData) {
-            let formattedData = '';
-            if (userData.rectpye === 'recheme') {
-                formattedData = formatRechemeData(userData);
-            } else if (userData.rectpye === 'blrec') {
-                formattedData = formatBlrecData(userData);
-            }
+        function displayUserData(userDataArray) {
+            let contentHtml = '<div class="tab-content">';
+            userDataArray.forEach(userData => {
+                const formattedData = userData.rectpye === 'recheme'
+                    ? formatRechemeData(userData)
+                    : formatBlrecData(userData);
+                const rawData = JSON.stringify(userData, null, 2);
+                contentHtml += `
+                    <div class="tab-pane fade ${userData.base_url === userDataArray[0].base_url ? 'show active' : ''}" id="${userData.base_url}">
+                        <div class="formatted-data">${formattedData}</div>
+                        <details>
+                            <summary>原始数据</summary>
+                            <pre><code>${rawData}</code></pre>
+                        </details>
+                    </div>`;
+            });
+            contentHtml += '</div>';
 
-            const rawData = JSON.stringify(userData, null, 2);
-            details.innerHTML = `
-        <div class="formatted-data">${formattedData}</div>
-        <details>
-            <summary>原始数据</summary>
-            <pre><code>${rawData}</code></pre>
-        </details>
-    `;
+            details.innerHTML = createPaginationTabs(userDataArray) + contentHtml;
         }
+
+        // 将毫秒数转换为时:分:秒格式
+        function formatDuration(milliseconds) {
+            // 将毫秒转换为秒，并四舍五入到最近的整数
+            let seconds = Math.round(milliseconds / 1000);
+
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return [hours, minutes, secs]
+                .map(val => val < 10 ? `0${val}` : val)
+                .join(':');
+        }
+
 
         // 格式化'recheme'类型的数据
         function formatRechemeData(data) {
             return `
+        <br>
         <div class="data-item">${data.title}</div>
         <hr>
         <div class="data-item"><a href="https://space.bilibili.com/${data.uid}" target="_blank">${data.name}</a> · <a href="https://live.bilibili.com/${data.roomId}" target="_blank">${data.roomId}</a></div>
@@ -425,21 +489,27 @@
         <div class="data-item">直播状态 ${data.streaming ? '🥰' : '😭'}</div>
         <div class="data-item">录制状态 ${data.recording ? '🥰' : '😭'}</div>
         <div class="data-item">自动录播 ${data.autoRecord ? '🥰' : '😭'}</div>
+        <div class="data-item">会话时长 ${formatDuration(data.recordingStats.sessionDuration)}</div>
+        <div class="data-item">总接受字节数 ${data.recordingStats.totalInputBytes}</div>
+
         <div class="data-item">流服务器 ${data.ioStats.streamHost}</div>
     `;
         }
+
         // 格式化'blrec'类型的数据
         function formatBlrecData(data) {
             return `
+        <br>
         <div class="data-item">${data.room_info.title}</div>
         <hr>
         <div class="data-item"><a href="https://space.bilibili.com/${data.user_info.uid}" target="_blank">${data.user_info.name}</a> · <a href="https://live.bilibili.com/${data.room_info.room_id}" target="_blank">${data.room_info.room_id}</a></div>
         <div class="data-item">${data.room_info.parent_area_name} · ${data.room_info.area_name}</div>
+        <div class="data-item">在线人数 ${data.room_info.online}</div>
         <div class="data-item">直播状态 ${data.room_info.live_status === 1 ? '🥰' : '😭'}</div>
         <div class="data-item">录制状态 ${data.task_status.running_status === "recording" ? '🥰' : '😭'}</div>
         <div class="data-item">自动录播 ${data.task_status.recorder_enabled ? '🥰' : '😭'}</div>
         <div class="data-item">流服务器 ${data.task_status.stream_host}</div>
-        <div class="data-item">在线人数 ${data.room_info.online}</div>
+        <div class="data-item">直播流类型 ${data.task_status.real_stream_format}</div>
     `;
         }
 
@@ -473,32 +543,42 @@
             const response = await fetch('/api/data');
             const { data } = await response.json();
             data.sort(compareUsers);
-
-            // 更新用户统计信息
-            document.getElementById('total-users').textContent = data.length;
-
-            const streamingUsersSet = new Set();
+        
+            // 合并同 rectpye 和 room_id 的用户
+            const uniqueUsersMap = new Map();
             data.forEach(user => {
+                const key = `${user.rectpye}-${user.rectpye === 'recheme' ? user.roomId : user.room_info.room_id}`;
+                if (!uniqueUsersMap.has(key)) {
+                    uniqueUsersMap.set(key, user);
+                }
+            });
+        
+            // 更新统计信息
+            document.getElementById('total-users').textContent = data.length;
+        
+            const streamingUsersSet = new Set();
+            uniqueUsersMap.forEach(user => {
                 if (isStreaming(user)) {
                     const name = user.rectpye === 'recheme' ? user.name : user.user_info.name;
                     streamingUsersSet.add(name);
                 }
             });
-
-            // 更新用户统计信息
-            document.getElementById('total-users').textContent = data.length;
-            const streamingCount = data.filter(user => isStreaming(user)).length;
+        
+            // 更新直播中信息
             document.getElementById('streaming-users').textContent = streamingUsersSet.size;
-            userList.innerHTML = data.map(user => {
+        
+            // 渲染用户列表
+            userList.innerHTML = Array.from(uniqueUsersMap.values()).map(user => {
                 const name = user.rectpye === 'recheme' ? user.name : user.user_info.name;
                 const iconClass = user.rectpye === 'recheme' ? 'recheme-icon' : 'blrec-icon';
                 const streamingClass = isStreaming(user) ? 'streaming' : '';
                 return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${user.rectpye === 'recheme' ? user.roomId : user.room_info.room_id}', '${user.rectpye}')">
-                        <div class="${iconClass}"></div>${name}
-                    </div>`;
+                            <div class="${iconClass}"></div>${name}
+                        </div>`;
             }).join('');
         };
         loadUserList();
+        
 
         // 搜索框
         function filterUsers() {
