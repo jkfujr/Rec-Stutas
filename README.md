@@ -1,44 +1,61 @@
-# 简介
+# Rec-Stutas
 
-![截图_2024-01-22_17-14-21](https://raw.githubusercontent.com/jkfujr/Rec-Stutas/main/%E6%88%AA%E5%9B%BE_1.png)
+Rec-Stutas and Description
 
+<!-- PROJECT SHIELDS -->
 
-一个用 python 实现的"多"录播姬/BLREC命令行简单的信息展示
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
 
-演示 [https://wll.114514.plus:11111/](https://wll.114514.plus:11111/)
+<!-- PROJECT LOGO -->
+<br />
 
+<p align="center">
+  <a href="https://github.com/jkfujr/Rec-Stutas/">
+    <img src="images/logo.svg" alt="Logo" width="80" height="80">
+  </a>
+
+  <h3 align="center">Rec-Stutas</h3>
+  <p align="center">
+    一个用 python 实现的 多 录播姬cli/BLREC的信息展示
+    <br />
+    <a href="https://github.com/jkfujr/Rec-Stutas"><strong>探索本项目的文档 »</strong></a>
+    <br />
+    <br />
+    <a href="https://wll.114514.plus:11111">查看演示</a>
+    ·
+    <a href="https://github.com/jkfujr/Rec-Stutas/issues">报告Bug</a>
+    ·
+    <a href="https://github.com/jkfujr/Rec-Stutas/issues">提出新特性</a>
+  </p>
+
+</p>
+
+![截图_1](./images/%E6%88%AA%E5%9B%BE_1.png)
 
 ## 使用说明
 
-1. 需要Python 3.10及以上版本
-
-2. 安装依赖
+**_需要 Python 3.10 及以上版本_**
 
 ```
-pip install -r requirements.txt
-```
+(1) 安装依赖
+# pip install -r requirements.txt
 
-3. 添加 API
+(2) 添加 API
+# 编辑 `config.example.yaml` 文件，添加录播姬/BLREC地址并重命名为 `config.yaml`
 
-```
-# 编辑 `config.example.yaml` 文件，添加录播姬/BLREC地址并重命名为 `config.yaml` 
-```
-
-4. 运行
-
-```
-python main.py
+(3) 运行
+# python main.py
 ```
 
 5. 访问 [http://127.0.0.1:1111](http://127.0.0.1:11111) (默认)
 
-
-
 ## 更新计划(饼)
 
-- 日志
 - 没想好
-
 
 ## 联系方式
 
@@ -49,5 +66,19 @@ Rec-NIC 今天也是咕咕咕的一天 179319267
 ## 相关项目
 
 > BililiveRecorder https://github.com/Bililive/BililiveRecorder
-> 
-> BililiveRecorder-WebUI https://github.com/BililiveRecorder/BililiveRecorder-WebUI
+>
+> BLREC https://github.com/acgnhiki/blrec
+
+<!-- links -->
+
+[your-project-path]: jkfujr/Rec-Stutas
+[contributors-shield]: https://img.shields.io/github/contributors/jkfujr/Rec-Stutas.svg?style=flat-square
+[contributors-url]: https://github.com/jkfujr/Rec-Stutas/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/jkfujr/Rec-Stutas.svg?style=flat-square
+[forks-url]: https://github.com/jkfujr/Rec-Stutas/network/members
+[stars-shield]: https://img.shields.io/github/stars/jkfujr/Rec-Stutas.svg?style=flat-square
+[stars-url]: https://github.com/jkfujr/Rec-Stutas/stargazers
+[issues-shield]: https://img.shields.io/github/issues/jkfujr/Rec-Stutas.svg?style=flat-square
+[issues-url]: https://img.shields.io/github/issues/jkfujr/Rec-Stutas.svg
+[license-shield]: https://img.shields.io/github/license/jkfujr/Rec-Stutas.svg?style=flat-square
+[license-url]: hhttps://github.com/jkfujr/Rec-Stutas/blob/main/LICENSE
