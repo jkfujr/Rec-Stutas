@@ -188,7 +188,7 @@
         }
 
         .nav-tabs .nav-link {
-            border: 1px solid transparent;
+            border: .0625rem solid transparent;
             border-radius: 0.25rem;
             margin-right: 0.5rem;
             padding: 0.5rem 1rem;
@@ -412,34 +412,32 @@
 
 
         // 获取并显示房间数据
-        const fetchRoomData = async (roomId, rec_tpye) => {
+        const fetchRoomData = async (roomId, recType) => {
             try {
-                const response = await fetch(`/api/data/${rec_tpye}/${roomId}`);
+                const response = await fetch(`/api/data/${recType}/${roomId}`);
                 if (!response.ok) {
                     throw new Error(`请求失败: ${response.status}`);
                 }
-                const data = await response.json();
-
-                displayUserData(data.data);  // 注意此处传入的是数组
+                const { data } = await response.json();
+                displayUserData(data);
             } catch (error) {
                 console.error('加载房间数据错误:', error);
-                details.innerHTML = `<p>无法加载数据: ${error.message}</p>`;
+                details.innerHTML = `<p>无法加载数据，请稍后再试。</p>`;
             }
         };
+
 
         // 创建分页标签
         function createPaginationTabs(data) {
             const uniqueBaseUrls = [...new Set(data.map(item => item.rec_url))];
-            let tabsHtml = '<ul class="nav nav-tabs">';
-            uniqueBaseUrls.forEach((url, index) => {
-                tabsHtml += `
-                    <li class="nav-item">
-                        <a class="nav-link ${index === 0 ? 'active' : ''}" data-bs-toggle="tab" href="#${url}">${url}</a>
-                    </li>`;
-            });
-            tabsHtml += '</ul>';
-            return tabsHtml;
+            const tabsHtml = uniqueBaseUrls.map((url, index) => `
+                <li class="nav-item">
+                    <a class="nav-link ${index === 0 ? 'active' : ''}" data-bs-toggle="tab" href="#${url}">${url}</a>
+                </li>
+            `).join('');
+            return `<ul class="nav nav-tabs">${tabsHtml}</ul>`;
         }
+
 
 
         // 格式化并展示用户数据
@@ -528,15 +526,10 @@
         const compareUsers = (a, b) => {
             const streamingA = isStreaming(a) ? 0 : 1;
             const streamingB = isStreaming(b) ? 0 : 1;
-
-            if (streamingA !== streamingB) {
-                return streamingA - streamingB;
-            }
-
-            const nameA = a.rec_tpye === 'recheme' ? a.name : a.user_info.name;
-            const nameB = b.rec_tpye === 'recheme' ? b.name : b.user_info.name;
-            return nameA.localeCompare(nameB, ['en', 'ja', 'zh-Hans-CN'], { sensitivity: 'accent' });
+            if (streamingA !== streamingB) return streamingA - streamingB;
+            return (a.name || a.user_info.name).localeCompare(b.name || b.user_info.name, ['en', 'ja', 'zh-Hans-CN'], { sensitivity: 'accent' });
         };
+
 
         // 加载用户列表
         const loadUserList = async () => {

@@ -25,7 +25,7 @@ Rec-Stutas and Description
     <a href="https://github.com/jkfujr/Rec-Stutas"><strong>探索本项目的文档 »</strong></a>
     <br />
     <br />
-    <a href="https://wll.114514.plus:11111">查看演示</a>
+    <a href="https://wll.114514.plus:11111" target="_blank">查看演示</a>
     ·
     <a href="https://github.com/jkfujr/Rec-Stutas/issues">报告Bug</a>
     ·

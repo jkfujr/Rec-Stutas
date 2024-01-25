@@ -129,9 +129,9 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
         if response.status_code == 200:
             data = response.json()
             if isinstance(data, list):
-                logger.debug(f"从 {url} 获取到数据: {len(data)} 条")
+                logger.debug(f"从 {url} 获取到数据数量: {len(data)}")
             elif isinstance(data, dict):
-                logger.debug(f"从 {url} 获取到数据: 1 条")
+                logger.debug(f"从 {url} 获取到数据数量: 1")
             return data
         else:
             logger.error(f"请求失败，状态码: {response.status_code}, URL: {url}")
@@ -211,7 +211,7 @@ def fetch_data() -> List[Dict]:
                         logger.debug(f"开始获取数据, API信息: {api_info}")
                         api_data = fetch_api_data(api_info)
                         all_data.extend(api_data)
-                        logger.debug(f"已获取数据, 数据数量: {len(api_data)}")
+                        logger.debug(f"已获取数据数量: {len(api_data)}")
 
     logger.debug(f"总数据量: {len(all_data)}")
     return all_data
