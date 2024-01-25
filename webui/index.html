@@ -412,9 +412,9 @@
 
 
         // 获取并显示房间数据
-        const fetchRoomData = async (roomId, rectpye) => {
+        const fetchRoomData = async (roomId, rec_tpye) => {
             try {
-                const response = await fetch(`/api/data/${rectpye}/${roomId}`);
+                const response = await fetch(`/api/data/${rec_tpye}/${roomId}`);
                 if (!response.ok) {
                     throw new Error(`请求失败: ${response.status}`);
                 }
@@ -429,7 +429,7 @@
 
         // 创建分页标签
         function createPaginationTabs(data) {
-            const uniqueBaseUrls = [...new Set(data.map(item => item.base_url))];
+            const uniqueBaseUrls = [...new Set(data.map(item => item.rec_url))];
             let tabsHtml = '<ul class="nav nav-tabs">';
             uniqueBaseUrls.forEach((url, index) => {
                 tabsHtml += `
@@ -446,12 +446,12 @@
         function displayUserData(userDataArray) {
             let contentHtml = '<div class="tab-content">';
             userDataArray.forEach(userData => {
-                const formattedData = userData.rectpye === 'recheme'
+                const formattedData = userData.rec_tpye === 'recheme'
                     ? formatRechemeData(userData)
                     : formatBlrecData(userData);
                 const rawData = JSON.stringify(userData, null, 2);
                 contentHtml += `
-                    <div class="tab-pane fade ${userData.base_url === userDataArray[0].base_url ? 'show active' : ''}" id="${userData.base_url}">
+                    <div class="tab-pane fade ${userData.rec_url === userDataArray[0].rec_url ? 'show active' : ''}" id="${userData.rec_url}">
                         <div class="formatted-data">${formattedData}</div>
                         <details>
                             <summary>原始数据</summary>
@@ -516,9 +516,9 @@
 
         // 判断是否正在直播
         const isStreaming = (user) => {
-            if (user.rectpye === 'recheme') {
+            if (user.rec_tpye === 'recheme') {
                 return user.streaming;
-            } else if (user.rectpye === 'blrec') {
+            } else if (user.rec_tpye === 'blrec') {
                 return user.room_info.live_status === 1;
             }
             return false;
@@ -533,8 +533,8 @@
                 return streamingA - streamingB;
             }
 
-            const nameA = a.rectpye === 'recheme' ? a.name : a.user_info.name;
-            const nameB = b.rectpye === 'recheme' ? b.name : b.user_info.name;
+            const nameA = a.rec_tpye === 'recheme' ? a.name : a.user_info.name;
+            const nameB = b.rec_tpye === 'recheme' ? b.name : b.user_info.name;
             return nameA.localeCompare(nameB, ['en', 'ja', 'zh-Hans-CN'], { sensitivity: 'accent' });
         };
 
@@ -543,42 +543,42 @@
             const response = await fetch('/api/data');
             const { data } = await response.json();
             data.sort(compareUsers);
-        
-            // 合并同 rectpye 和 room_id 的用户
+
+            // 合并同 rec_tpye 和 room_id 的用户
             const uniqueUsersMap = new Map();
             data.forEach(user => {
-                const key = `${user.rectpye}-${user.rectpye === 'recheme' ? user.roomId : user.room_info.room_id}`;
+                const key = `${user.rec_tpye}-${user.rec_tpye === 'recheme' ? user.roomId : user.room_info.room_id}`;
                 if (!uniqueUsersMap.has(key)) {
                     uniqueUsersMap.set(key, user);
                 }
             });
-        
+
             // 更新统计信息
             document.getElementById('total-users').textContent = data.length;
-        
+
             const streamingUsersSet = new Set();
             uniqueUsersMap.forEach(user => {
                 if (isStreaming(user)) {
-                    const name = user.rectpye === 'recheme' ? user.name : user.user_info.name;
+                    const name = user.rec_tpye === 'recheme' ? user.name : user.user_info.name;
                     streamingUsersSet.add(name);
                 }
             });
-        
+
             // 更新直播中信息
             document.getElementById('streaming-users').textContent = streamingUsersSet.size;
-        
+
             // 渲染用户列表
             userList.innerHTML = Array.from(uniqueUsersMap.values()).map(user => {
-                const name = user.rectpye === 'recheme' ? user.name : user.user_info.name;
-                const iconClass = user.rectpye === 'recheme' ? 'recheme-icon' : 'blrec-icon';
+                const name = user.rec_tpye === 'recheme' ? user.name : user.user_info.name;
+                const iconClass = user.rec_tpye === 'recheme' ? 'recheme-icon' : 'blrec-icon';
                 const streamingClass = isStreaming(user) ? 'streaming' : '';
-                return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${user.rectpye === 'recheme' ? user.roomId : user.room_info.room_id}', '${user.rectpye}')">
+                return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${user.rec_tpye === 'recheme' ? user.roomId : user.room_info.room_id}', '${user.rec_tpye}')">
                             <div class="${iconClass}"></div>${name}
                         </div>`;
             }).join('');
         };
         loadUserList();
-        
+
 
         // 搜索框
         function filterUsers() {

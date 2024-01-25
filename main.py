@@ -90,7 +90,7 @@ session = requests.Session()
 # 根据API信息构建请求头
 def build_request_headers(api_info: Dict) -> Dict:
     headers = {}
-    rectype = api_info["rectpye"]
+    rectype = api_info["rec_tpye"]
 
     if rectype == "blrec":
         api_key = api_info.get(
@@ -143,6 +143,7 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
         logger.error(f"请求异常: {e}, URL: {url}")
         return []
 
+
 # 请求所有直播间的数据
 def fetch_api_data(api_info: Dict) -> List[Dict]:
     """
@@ -152,47 +153,46 @@ def fetch_api_data(api_info: Dict) -> List[Dict]:
     """
     url = (
         f"{api_info['URL']}/api/room"
-        if api_info["rectpye"] == "recheme"
+        if api_info["rec_tpye"] == "recheme"
         else f"{api_info['URL']}/api/v1/tasks/data"
     )
     headers = build_request_headers(api_info)
     api_data = perform_api_request(url, headers)
 
     for item in api_data:
-        item.update({"rectpye": api_info["rectpye"], "base_url": api_info["URL"]})
+        item.update({"rec_tpye": api_info["rec_tpye"], "rec_url": api_info["URL"]})
     return api_data
 
 
 # 请求特定直播间的数据
-# 请求特定直播间的数据
-def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
+def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
     """
     请求特定直播间的数据。
     :param room_id: 直播间ID。
-    :param rectpye: 数据类型（recheme或blrec）。
+    :param rec_tpye: 数据类型（recheme或blrec）。
     :return: 直播间数据列表。
     """
     room_data = []
     for data in cached_data:
-        if rectpye is None or data["rectpye"] == rectpye:
-            if data["rectpye"] == "recheme" and str(data.get("roomId")) == room_id:
-                url = f"{data['base_url']}/api/room/{room_id}"
+        if rec_tpye is None or data["rec_tpye"] == rec_tpye:
+            if data["rec_tpye"] == "recheme" and str(data.get("roomId")) == room_id:
+                url = f"{data['rec_url']}/api/room/{room_id}"
             elif (
-                data["rectpye"] == "blrec"
+                data["rec_tpye"] == "blrec"
                 and str(data.get("room_info", {}).get("room_id")) == room_id
             ):
-                url = f"{data['base_url']}/api/v1/tasks/{room_id}/data"
+                url = f"{data['rec_url']}/api/v1/tasks/{room_id}/data"
             else:
                 continue
 
-            headers = build_request_headers({"rectpye": data["rectpye"]})
+            headers = build_request_headers({"rec_tpye": data["rec_tpye"]})
             single_room_data = perform_api_request(url, headers)
             if single_room_data:
                 single_room_data.update(
-                    {"rectpye": data["rectpye"], "base_url": data["base_url"]}
+                    {"rec_tpye": data["rec_tpye"], "rec_url": data["rec_url"]}
                 )
                 room_data.append(single_room_data)
-                
+
                 # 打印获取的数据
                 logger.debug(f"获取到的直播间数据: {single_room_data}")
 
@@ -207,7 +207,7 @@ def fetch_data() -> List[Dict]:
             for api_key, api_info_list in apis.items():
                 if isinstance(api_info_list, list):
                     for api_info in api_info_list:
-                        api_info.update({"rectpye": rectype.lower()})
+                        api_info.update({"rec_tpye": rectype.lower()})
                         logger.debug(f"开始获取数据, API信息: {api_info}")
                         api_data = fetch_api_data(api_info)
                         all_data.extend(api_data)
@@ -252,7 +252,7 @@ async def get_recheme_data():
     global cached_data
     logger.debug(f"请求获取 recheme 类型的所有数据")
     cached_data = fetch_data()
-    recheme_data = [d for d in cached_data if d["rectpye"] == "recheme"]
+    recheme_data = [d for d in cached_data if d["rec_tpye"] == "recheme"]
     logger.debug(f"获取到的 recheme 数据数量: {len(recheme_data)}")
     return {"data": recheme_data}
 
@@ -264,7 +264,7 @@ async def get_blrec_data():
     global cached_data
     logger.debug(f"请求获取 blrec 类型的所有数据")
     cached_data = fetch_data()
-    blrec_data = [d for d in cached_data if d["rectpye"] == "blrec"]
+    blrec_data = [d for d in cached_data if d["rec_tpye"] == "blrec"]
     logger.debug(f"获取到的 blrec 数据数量: {len(blrec_data)}")
     return {"data": blrec_data}
 
