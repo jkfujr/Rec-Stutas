@@ -83,8 +83,6 @@ templates = Jinja2Templates(directory="webui")
 ### 一些全局变量
 # 数据缓存
 cached_data = None
-# 全局Session对象
-session = requests.Session()
 
 
 # 根据API信息构建请求头
@@ -125,7 +123,7 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
     :return: API返回的数据列表。
     """
     try:
-        response = session.get(url, headers=headers, timeout=3)
+        response = requests.get(url, headers=headers, timeout=3)
         if response.status_code == 200:
             data = response.json()
             if isinstance(data, list):
