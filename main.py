@@ -145,10 +145,11 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
 
 
 # 请求所有直播间的数据
-def fetch_api_data(api_info: Dict) -> List[Dict]:
+def fetch_api_data(api_info: Dict, rec_name: str) -> List[Dict]:
     """
     请求所有直播间的数据。
     :param api_info: 包含API详细信息的字典。
+    :param rec_name: API的名称，如'REC001'。
     :return: 从API获取的数据列表。
     """
     url = (
@@ -160,7 +161,13 @@ def fetch_api_data(api_info: Dict) -> List[Dict]:
     api_data = perform_api_request(url, headers)
 
     for item in api_data:
-        item.update({"rec_tpye": api_info["rec_tpye"], "rec_url": api_info["URL"]})
+        item.update(
+            {
+                "rec_name": rec_name,
+                "rec_tpye": api_info["rec_tpye"],
+                "rec_url": api_info["URL"],
+            }
+        )
     return api_data
 
 
@@ -189,7 +196,11 @@ def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
             single_room_data = perform_api_request(url, headers)
             if single_room_data:
                 single_room_data.update(
-                    {"rec_tpye": data["rec_tpye"], "rec_url": data["rec_url"]}
+                    {
+                        "rec_name": data["rec_name"],
+                        "rec_tpye": data["rec_tpye"],
+                        "rec_url": data["rec_url"],
+                    }
                 )
                 room_data.append(single_room_data)
 
@@ -204,12 +215,12 @@ def fetch_data() -> List[Dict]:
     all_data = []
     for rectype, apis in config.items():
         if rectype in ["RECHEME", "BLREC"]:
-            for api_key, api_info_list in apis.items():
+            for rec_name, api_info_list in apis.items():
                 if isinstance(api_info_list, list):
                     for api_info in api_info_list:
                         api_info.update({"rec_tpye": rectype.lower()})
                         logger.debug(f"开始获取数据, API信息: {api_info}")
-                        api_data = fetch_api_data(api_info)
+                        api_data = fetch_api_data(api_info, rec_name)
                         all_data.extend(api_data)
                         logger.debug(f"已获取数据数量: {len(api_data)}")
 
