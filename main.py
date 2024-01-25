@@ -128,7 +128,10 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
         response = session.get(url, headers=headers, timeout=3)
         if response.status_code == 200:
             data = response.json()
-            logger.debug(f"从 {url} 获取到数据: {len(data)} 条")
+            if isinstance(data, list):
+                logger.debug(f"从 {url} 获取到数据: {len(data)} 条")
+            elif isinstance(data, dict):
+                logger.debug(f"从 {url} 获取到数据: 1 条")
             return data
         else:
             logger.error(f"请求失败，状态码: {response.status_code}, URL: {url}")
@@ -139,7 +142,6 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
     except Exception as e:
         logger.error(f"请求异常: {e}, URL: {url}")
         return []
-
 
 # 请求所有直播间的数据
 def fetch_api_data(api_info: Dict) -> List[Dict]:
@@ -161,6 +163,7 @@ def fetch_api_data(api_info: Dict) -> List[Dict]:
     return api_data
 
 
+# 请求特定直播间的数据
 # 请求特定直播间的数据
 def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
     """
@@ -189,6 +192,10 @@ def fetch_room_data(room_id: str, rectpye: str = None) -> List[Dict]:
                     {"rectpye": data["rectpye"], "base_url": data["base_url"]}
                 )
                 room_data.append(single_room_data)
+                
+                # 打印获取的数据
+                logger.debug(f"获取到的直播间数据: {single_room_data}")
+
     return room_data
 
 
