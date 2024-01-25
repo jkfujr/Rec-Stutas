@@ -41,17 +41,18 @@ Rec-Stutas and Description
 **_需要 Python 3.10 及以上版本_**
 
 ```
-(1) 安装依赖
-# pip install -r requirements.txt
+# 1.安装依赖
+pip install -r requirements.txt
 
-(2) 添加 API
-# 编辑 `config.example.yaml` 文件，添加录播姬/BLREC地址并重命名为 `config.yaml`
+# 2.添加 API
+编辑 `config.example.yaml` 文件，添加录播姬/BLREC地址并重命名为 `config.yaml`
 
-(3) 运行
-# python main.py
+# 3.运行
+python main.py
+
+# 4.访问
+http://127.0.0.1:1111 (默认)
 ```
-
-5. 访问 [http://127.0.0.1:1111](http://127.0.0.1:11111) (默认)
 
 ## 更新计划(饼)
 
