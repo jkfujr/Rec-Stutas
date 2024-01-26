@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-Hans-CN">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>录播状态</title>
-        <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
-        <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>录播状态</title>
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <style>
         /* 响应式 */
         @media (max-width: 48rem) {
             #main-container {
@@ -287,101 +287,82 @@
             filter: invert(100%);
         }
     </style>
-    </head>
+</head>
 
-    <body>
-        <!-- 导航栏 -->
-        <header>
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#">录播状态</a>
-                    <button class="navbar-toggler" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false"
-                        aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <li class="nav-item"><a class="nav-link active"
-                                    aria-current="page" href="/api/data"
-                                    target="_blank">API喵</a></li>
-                            <li class="nav-item"><a class="nav-link active"
-                                    aria-current="page"
-                                    href="https://github.com/jkfujr/Rec-Stutas"
-                                    target="_blank">GitHub喵</a></li>
-                        </ul>
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item dropdown">
-                                <a class="btn btn-outline-secondary" href="#"
-                                    id="themeDropdown" role="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <img id="themeIcon"
-                                        src="./assets/img/sun-fill.svg"
-                                        alt="Theme Icon"
-                                        style="width: 1.25rem; height: 1.25rem;">
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end"
-                                    aria-labelledby="themeDropdown">
-                                    <li><a class="dropdown-item"
-                                            onclick="setTheme('light')">
-                                            <img src="./assets/img/sun-fill.svg"
-                                                alt="Sun Icon"
-                                                style="width: 1.25rem; height: 1.25rem; margin-right: .3125rem;">Light
-                                        </a></li>
-                                    <li><a class="dropdown-item"
-                                            onclick="setTheme('dark')">
-                                            <img
-                                                src="./assets/img/moon-stars-fill.svg"
-                                                alt="Moon Icon"
-                                                style="width: 1.25rem; height: 1.25rem; margin-right: .3125rem;">Dark
-                                        </a></li>
-                                    <li>
-                                        <a class="dropdown-item">
-                                            <input type="checkbox"
-                                                id="blurEffectToggle"
-                                                onchange="toggleBlurEffect()">
-                                            <label
-                                                for="blurEffectToggle">毛玻璃</label>
-                                        </a>
-                                    </li>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">录播状态</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="/api/data"
+                                target="_blank">API喵</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page"
+                                href="https://github.com/jkfujr/Rec-Stutas" target="_blank">GitHub喵</a></li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="btn btn-outline-secondary" href="#" id="themeDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <img id="themeIcon" src="./assets/img/sun-fill.svg" alt="Theme Icon"
+                                    style="width: 1.25rem; height: 1.25rem;">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
+                                <li><a class="dropdown-item" onclick="setTheme('light')">
+                                        <img src="./assets/img/sun-fill.svg" alt="Sun Icon"
+                                            style="width: 1.25rem; height: 1.25rem; margin-right: .3125rem;">Light
+                                    </a></li>
+                                <li><a class="dropdown-item" onclick="setTheme('dark')">
+                                        <img src="./assets/img/moon-stars-fill.svg" alt="Moon Icon"
+                                            style="width: 1.25rem; height: 1.25rem; margin-right: .3125rem;">Dark
+                                    </a></li>
+                                <li>
+                                    <a class="dropdown-item">
+                                        <input type="checkbox" id="blurEffectToggle" onchange="toggleBlurEffect()">
+                                        <label for="blurEffectToggle">毛玻璃</label>
+                                    </a>
+                                </li>
 
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
-            </nav>
-        </header>
-
-        <!-- 主内容区 -->
-        <main class="container-fluid">
-            <div class="row" id="main-container">
-                <!-- 侧边栏 -->
-                <div class="sidebar col-md-3" id="sidebar">
-                    <!-- 搜索框 -->
-                    <div class="search-container" id="search-container">
-                        <input type="text" id="userSearch" placeholder="搜索用户..."
-                            onkeyup="filterUsers()">
-                    </div>
-                    <!-- 状态栏 -->
-                    <div id="user-stats" class="user-stats">
-                        <p>监控中 <span id="total-users">0</span></p>
-                        <p>直播中 <span id="streaming-users">0</span></p>
-                    </div>
-                    <!-- 用户列表内容 -->
-                    <div id="user-list"></div>
-                </div>
-                <!-- 详细信息区域 -->
-                <section class="details col-md-9" id="details">
-                    点击左侧用户名以查看详情。
-                </section>
             </div>
-        </main>
+        </nav>
+    </header>
 
-        <script src="./assets/js/bootstrap.bundle.min.js"></script>
-        <script>
+    <!-- 主内容区 -->
+    <main class="container-fluid">
+        <div class="row" id="main-container">
+            <!-- 侧边栏 -->
+            <div class="sidebar col-md-3" id="sidebar">
+                <!-- 搜索框 -->
+                <div class="search-container" id="search-container">
+                    <input type="text" id="userSearch" placeholder="搜索用户..." onkeyup="filterUsers()">
+                </div>
+                <!-- 状态栏 -->
+                <div id="user-stats" class="user-stats">
+                    <p>监控中 <span id="total-users">0</span></p>
+                    <p>直播中 <span id="streaming-users">0</span></p>
+                </div>
+                <!-- 用户列表内容 -->
+                <div id="user-list"></div>
+            </div>
+            <!-- 详细信息区域 -->
+            <section class="details col-md-9" id="details">
+                点击左侧用户名以查看详情。
+            </section>
+        </div>
+    </main>
+
+    <script src="./assets/js/bootstrap.bundle.min.js"></script>
+    <script>
         // 常用缓存
         const body = document.body;
         const navbar = document.querySelector('.navbar');
@@ -481,9 +462,11 @@
             details.innerHTML = createPaginationTabs(userDataArray) + contentHtml;
         }
 
-        // 将毫秒数转换为时:分:秒
-        function formatTime_ms(milliseconds) {
-            let seconds = Math.round(milliseconds / 1000);
+        // 将时间转换为时:分:秒格式
+        // timeValue: 时间数值
+        // unit: 时间单位，'ms' 表示毫秒，'s' 表示秒
+        function formatTime(timeValue, unit) {
+            let seconds = unit === 'ms' ? Math.round(timeValue / 1000) : Math.round(timeValue);
 
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
@@ -492,26 +475,18 @@
                 .map(val => val < 10 ? `0${val}` : val)
                 .join(':');
         }
-        // 将秒数转换为时:分:秒
-        function formatTime_s(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const sec = Math.floor(seconds % 60);
 
-            return [hours, minutes, sec]
-                .map(val => val < 10 ? "0" + val : val)
-                .join(":");
-        }
 
-        // 将字节转换为MB并保留两位小数
-        function bytesToMB(bytes) {
-            return (bytes / (1024 * 1024)).toFixed(2);
-        }
-
-        // 将比特转换为MB并保留两位小数
-        function bitsToMB(bits) {
-            const bytes = bits / 8; // 1字节等于8比特
-            return (bytes / (1024 * 1024)).toFixed(2); // 将字节转换为MB
+        // 将字节或比特转换为MB并保留两位小数
+        // value: 数据数值
+        // unit: 数据单位，'bytes' 表示字节，'bits' 表示比特
+        function convertToMB(value, unit) {
+            if (unit === 'bits') {
+                // 如果单位是比特，则先转换为字节
+                value = value / 8;
+            }
+            // 然后将字节转换为MB
+            return (value / (1024 * 1024)).toFixed(2);
         }
 
         // 格式化'recheme'类型的数据
@@ -525,10 +500,10 @@
         <div class="data-item">直播状态 ${data.streaming ? '🥰' : '😭'}</div>
         <div class="data-item">录制状态 ${data.recording ? '🥰' : '😭'}</div>
         <div class="data-item">自动录播 ${data.autoRecord ? '🥰' : '😭'}</div>
-        <div class="data-item">会话时长 ${formatTime_ms(data.recordingStats.sessionDuration)}</div>
-        <div class="data-item">总接受字节数 ${bytesToMB(data.recordingStats.totalInputBytes)} MB</div>
-        <div class="data-item">总写入字节数 ${bytesToMB(data.recordingStats.totalOutputBytes)} MB</div>
-        <div class="data-item">当前文件的大小 ${bytesToMB(data.recordingStats.currentFileSize)} MB</div>
+        <div class="data-item">会话时长 ${formatTime(data.recordingStats.sessionDuration, 'ms')}</div>
+        <div class="data-item">总接受字节数 ${convertToMB(data.recordingStats.totalInputBytes, 'bytes')} MB</div>
+        <div class="data-item">总写入字节数 ${convertToMB(data.recordingStats.totalOutputBytes, 'bytes')} MB</div>
+        <div class="data-item">当前文件的大小 ${convertToMB(data.recordingStats.currentFileSize, 'bytes')} MB</div>
 
         <div class="data-item">流服务器 ${data.ioStats.streamHost}</div>
     `;
@@ -545,11 +520,11 @@
         <div class="data-item">直播状态 ${data.room_info.live_status === 1 ? '🥰' : '😭'}</div>
         <div class="data-item">录制状态 ${data.task_status.running_status === "recording" ? '🥰' : '😭'}</div>
         <div class="data-item">自动录播 ${data.task_status.recorder_enabled ? '🥰' : '😭'}</div>
-        <div class="data-item">下载速度 ${bitsToMB(data.task_status.dl_rate)} MB/s</div>
-        <div class="data-item">下载总计 ${bitsToMB(data.task_status.dl_total)} MB</div>
-        <div class="data-item">录制速度 ${bitsToMB(data.task_status.rec_rate)} MB/s</div>
-        <div class="data-item">录制总计 ${bitsToMB(data.task_status.rec_total)} MB</div>
-        <div class="data-item">录制用时 ${formatTime_s(data.task_status.rec_elapsed)}</div>
+        <div class="data-item">下载速度 ${convertToMB(data.task_status.dl_rate, 'bits')} MB/s</div>
+        <div class="data-item">下载总计 ${convertToMB(data.task_status.dl_total, 'bits')} MB</div>
+        <div class="data-item">录制速度 ${convertToMB(data.task_status.rec_rate, 'bits')} MB/s</div>
+        <div class="data-item">录制总计 ${convertToMB(data.task_status.rec_total, 'bits')} MB</div>
+        <div class="data-item">录制用时 ${formatTime(data.task_status.rec_elapsed, 's')}</div>
         <div class="data-item">流服务器 ${data.task_status.stream_host}</div>
         <div class="data-item">直播流类型 ${data.task_status.real_stream_format}</div>
     `;
@@ -577,45 +552,42 @@
 
         // 加载用户列表
         const loadUserList = async () => {
-            const response = await fetch('/api/data');
-            const { data } = await response.json();
-            data.sort(compareUsers);
+            try {
+                const response = await fetch('/api/data');
+                const { data } = await response.json();
 
-            // 合并同类型录播机下同一个用户
-            const uniqueUsersMap = new Map();
-            data.forEach(user => {
-                const key = `${user.rec_tpye}-${user.rec_tpye === 'recheme' ? user.roomId : user.room_info.room_id}`;
-                if (!uniqueUsersMap.has(key)) {
-                    uniqueUsersMap.set(key, user);
-                }
-            });
+                // 使用更简洁的方式合并同类型录播机下同一个用户
+                const uniqueUsers = new Map(data.map(user => {
+                    const key = `${user.rec_tpye}-${user.rec_tpye === 'recheme' ? user.roomId : user.room_info.room_id}`;
+                    return [key, user];
+                }));
 
-            // 更新统计信息
-            document.getElementById('total-users').textContent = data.length;
+                // 更新统计信息
+                document.getElementById('total-users').textContent = data.length;
+                document.getElementById('streaming-users').textContent = Array.from(uniqueUsers.values()).filter(isStreaming).length;
 
-            const streamingUsersSet = new Set();
-            uniqueUsersMap.forEach(user => {
-                if (isStreaming(user)) {
-                    const name = user.rec_tpye === 'recheme' ? user.name : user.user_info.name;
-                    streamingUsersSet.add(name);
-                }
-            });
-
-            // 更新直播中信息
-            document.getElementById('streaming-users').textContent = streamingUsersSet.size;
-
-            // 渲染用户列表
-            userList.innerHTML = Array.from(uniqueUsersMap.values()).map(user => {
-                const name = user.rec_tpye === 'recheme' ? user.name : user.user_info.name;
-                const iconClass = user.rec_tpye === 'recheme' ? 'recheme-icon' : 'blrec-icon';
-                const streamingClass = isStreaming(user) ? 'streaming' : '';
-                return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${user.rec_tpye === 'recheme' ? user.roomId : user.room_info.room_id}', '${user.rec_tpye}')">
-                            <div class="${iconClass}"></div>${name}
-                        </div>`;
-            }).join('');
+                // 渲染用户列表
+                userList.innerHTML = Array.from(uniqueUsers.values())
+                    .sort(compareUsers)
+                    .map(user => createUserItem(user))
+                    .join('');
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+                // 可以在这里添加一些用户友好的错误处理显示
+            }
         };
-        loadUserList();
 
+        // 创建用户列表项
+        function createUserItem(user) {
+            const name = user.rec_tpye === 'recheme' ? user.name : user.user_info.name;
+            const iconClass = user.rec_tpye === 'recheme' ? 'recheme-icon' : 'blrec-icon';
+            const streamingClass = isStreaming(user) ? 'streaming' : '';
+            return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${user.rec_tpye === 'recheme' ? user.roomId : user.room_info.room_id}', '${user.rec_tpye}')">
+                <div class="${iconClass}"></div>${name}
+            </div>`;
+        }
+
+        loadUserList();
 
         // 搜索框
         function filterUsers() {
@@ -630,6 +602,6 @@
 
     </script>
 
-    </body>
+</body>
 
 </html>
