@@ -41,17 +41,3 @@ Rec-NIC 今天也是咕咕咕的一天 179319267
 > BililiveRecorder https://github.com/Bililive/BililiveRecorder
 >
 > BLREC https://github.com/acgnhiki/blrec
-
-<!-- links -->
-
-[your-project-path]: jkfujr/Rec-Stutas
-[contributors-shield]: https://img.shields.io/github/contributors/jkfujr/Rec-Stutas.svg?style=flat-square
-[contributors-url]: https://github.com/jkfujr/Rec-Stutas/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/jkfujr/Rec-Stutas.svg?style=flat-square
-[forks-url]: https://github.com/jkfujr/Rec-Stutas/network/members
-[stars-shield]: https://img.shields.io/github/stars/jkfujr/Rec-Stutas.svg?style=flat-square
-[stars-url]: https://github.com/jkfujr/Rec-Stutas/stargazers
-[issues-shield]: https://img.shields.io/github/issues/jkfujr/Rec-Stutas.svg?style=flat-square
-[issues-url]: https://img.shields.io/github/issues/jkfujr/Rec-Stutas.svg
-[license-shield]: https://img.shields.io/github/license/jkfujr/Rec-Stutas.svg?style=flat-square
-[license-url]: hhttps://github.com/jkfujr/Rec-Stutas/blob/main/LICENSE
