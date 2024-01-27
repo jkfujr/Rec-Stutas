@@ -1,44 +1,14 @@
-# Rec-Stutas
+![Rec-Stutas](https://socialify.git.ci/jkfujr/Rec-Stutas/image?font=Raleway&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fjkfujr%2FRec-Stutas%2Fmain%2Fimages%2Flogo.svg&name=1&owner=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto)
 
-Rec-Stutas and Description
-
-<!-- PROJECT SHIELDS -->
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-
-<!-- PROJECT LOGO -->
-<br />
-
-<p align="center">
-  <a href="https://github.com/jkfujr/Rec-Stutas/">
-    <img src="images/logo.svg" alt="Logo" width="80" height="80">
-  </a>
-
-  <h3 align="center">Rec-Stutas</h3>
-  <p align="center">
-    一个用 python 实现的 多 录播姬cli/BLREC的信息展示
-    <br />
-    <a href="https://github.com/jkfujr/Rec-Stutas"><strong>探索本项目的文档 »</strong></a>
-    <br />
-    <br />
-    <a href="https://wll.114514.plus:11111" target="_blank">查看演示</a>
-    ·
-    <a href="https://github.com/jkfujr/Rec-Stutas/issues">报告Bug</a>
-    ·
-    <a href="https://github.com/jkfujr/Rec-Stutas/issues">提出新特性</a>
-  </p>
-
-</p>
-
-<br />
+# 简介
 
 ![截图_1](./images/%E6%88%AA%E5%9B%BE_1.png)
 
-## 使用说明
+一个用 python 实现的 多 录播姬cli/BLREC的信息展示
+
+演示: https://wll.114514.plus:11111/
+
+# 使用说明
 
 **_需要 Python 3.10 及以上版本_**
 
@@ -56,17 +26,17 @@ python main.py
 http://127.0.0.1:1111 (默认)
 ```
 
-## 更新计划(饼)
+# 更新计划(饼)
 
 - 没想好
 
-## 联系方式
+# 联系方式
 
 Rec-NIC 今天也是咕咕咕的一天 179319267
 
     (录播姬非官方闲聊群但是官方)
 
-## 相关项目
+# 相关项目
 
 > BililiveRecorder https://github.com/Bililive/BililiveRecorder
 >
