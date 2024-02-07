@@ -5,6 +5,8 @@ import base64
 import requests
 import uvicorn
 import logging
+import glob
+from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from typing import List, Dict
 from fastapi import FastAPI, HTTPException, Request
@@ -15,24 +17,28 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 ### 日志模块
-# 获取所在的目录
-script_directory = os.path.dirname(__file__)
+# 获取所在的目录并创建日志目录
+script_directory = os.path.dirname(os.path.abspath(__file__))
 log_directory = os.path.join(script_directory, "logs")
-os.makedirs(log_directory, exist_ok=True)
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
 
 # 配置日志记录器
 log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] - %(message)s")
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-# 按日期分割日志文件并保留30天
-log_file_handler = TimedRotatingFileHandler(
-    os.path.join(log_directory, "log.log"),
-    when="D",
-    interval=1,
-    backupCount=30,
-    encoding="utf-8",
-)
+# 定义日志文件名称为当前日期
+current_log_file = datetime.now().strftime("%Y-%m-%d.log")
+log_file_path = os.path.join(log_directory, current_log_file)
+
+# 检查并删除最旧的日志文件，只保留最新的30个文件
+log_files = sorted(glob.glob(os.path.join(log_directory, "*.log")))
+while len(log_files) > 30:
+    os.remove(log_files.pop(0))
+
+# 创建日志文件处理器，每天分割日志文件
+log_file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
 log_file_handler.setFormatter(log_formatter)
 if not logger.handlers:
     logger.addHandler(log_file_handler)
@@ -83,6 +89,8 @@ templates = Jinja2Templates(directory="webui")
 ### 一些全局变量
 # 数据缓存
 cached_data = None
+# 全局 Session 对象
+session = requests.Session()
 
 
 # 根据API信息构建请求头
@@ -123,7 +131,7 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
     :return: API返回的数据列表。
     """
     try:
-        response = requests.get(url, headers=headers, timeout=3)
+        response = session.get(url, headers=headers, timeout=3)
         if response.status_code == 200:
             data = response.json()
             if isinstance(data, list):
@@ -202,7 +210,6 @@ def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
                 )
                 room_data.append(single_room_data)
 
-                # 打印获取的数据
                 logger.debug(f"获取到的直播间数据: {single_room_data}")
 
     return room_data
