@@ -43,6 +43,21 @@ log_file_handler.setFormatter(log_formatter)
 if not logger.handlers:
     logger.addHandler(log_file_handler)
 
+# 检查当前日期的日志文件是否存在，不存在则创建
+if not os.path.exists(log_file_path):
+    with open(log_file_path, "w") as f:
+        pass
+
+# 检查当前日期的日志文件是否存在，不存在或者日期不是当前日期则创建新的日志文件
+if (
+    not os.path.exists(log_file_path)
+    or os.path.basename(log_file_path) != current_log_file
+):
+    log_file_path = os.path.join(log_directory, current_log_file)
+    log_file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
+    log_file_handler.setFormatter(log_formatter)
+    logger.handlers = [log_file_handler]
+
 
 ### 配置文件模块
 # 读取配置文件
@@ -237,6 +252,12 @@ def fetch_data() -> List[Dict]:
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+# webui端点
+@app.get("/rechemetool", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("recheme.html", {"request": request})
 
 
 # 获取所有数据
