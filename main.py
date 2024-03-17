@@ -5,58 +5,57 @@ import base64
 import requests
 import uvicorn
 import logging
-import glob
 from datetime import datetime
-from logging.handlers import TimedRotatingFileHandler
 from typing import List, Dict
+from logging.handlers import TimedRotatingFileHandler
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
+from concurrent.futures import ThreadPoolExecutor
 
 ### 日志模块
-# 获取所在的目录并创建日志目录
-script_directory = os.path.dirname(os.path.abspath(__file__))
-log_directory = os.path.join(script_directory, "logs")
-if not os.path.exists(log_directory):
-    os.makedirs(log_directory)
+def log():
+    global logger
+    # 检查是否已经配置了处理器，避免重复配置
+    if logging.getLogger().handlers:
+        return logging.getLogger()
 
-# 配置日志记录器
-log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] - %(message)s")
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+    # 获取所在的目录并创建日志目录
+    script_directory = os.path.dirname(os.path.abspath(__file__))
+    log_directory = os.path.join(script_directory, "logs")
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
 
-# 定义日志文件名称为当前日期
-current_log_file = datetime.now().strftime("%Y-%m-%d.log")
-log_file_path = os.path.join(log_directory, current_log_file)
+    # 配置日志格式
+    log_formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(processName)s - %(message)s"
+    )
 
-# 检查并删除最旧的日志文件，只保留最新的30个文件
-log_files = sorted(glob.glob(os.path.join(log_directory, "*.log")))
-while len(log_files) > 30:
-    os.remove(log_files.pop(0))
+    # 定义日志文件名称和后缀
+    current_date = datetime.now().strftime("%Y%m%d")
+    log_file_name = f"rs{current_date}.log"
+    log_file_path = os.path.join(log_directory, log_file_name)
 
-# 创建日志文件处理器，每天分割日志文件
-log_file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
-log_file_handler.setFormatter(log_formatter)
-if not logger.handlers:
+    # 创建日志文件处理器,每天分割日志文件
+    log_file_handler = TimedRotatingFileHandler(
+        log_file_path,
+        when="midnight",
+        interval=1,
+        backupCount=30,
+        encoding="utf-8",
+    )
+    log_file_handler.setFormatter(log_formatter)
+
+    # 创建并配置 logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(log_file_handler)
 
-# 检查当前日期的日志文件是否存在，不存在则创建
-if not os.path.exists(log_file_path):
-    with open(log_file_path, "w") as f:
-        pass
+    return logger
 
-# 检查当前日期的日志文件是否存在，不存在或者日期不是当前日期则创建新的日志文件
-if (
-    not os.path.exists(log_file_path)
-    or os.path.basename(log_file_path) != current_log_file
-):
-    log_file_path = os.path.join(log_directory, current_log_file)
-    log_file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
-    log_file_handler.setFormatter(log_formatter)
-    logger.handlers = [log_file_handler]
+# 初始化 logger
+logger = log()
 
 
 ### 配置文件模块
@@ -200,6 +199,12 @@ def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
     :param rec_tpye: 数据类型（recheme或blrec）。
     :return: 直播间数据列表。
     """
+    global cached_data
+
+    if cached_data is None:
+        logger.warning("缓存数据为空，正在重新获取所有数据")
+        cached_data = fetch_data()
+
     room_data = []
     for data in cached_data:
         if rec_tpye is None or data["rec_tpye"] == rec_tpye:
@@ -228,6 +233,7 @@ def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
                 logger.debug(f"获取到的直播间数据: {single_room_data}")
 
     return room_data
+
 
 
 # API数据请求
@@ -336,5 +342,4 @@ if __name__ == "__main__":
         host=config["HOST"],
         port=config["PORT"],
         log_level="info",
-        reload=True,
     )
