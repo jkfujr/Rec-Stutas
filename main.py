@@ -5,37 +5,42 @@ import base64
 import requests
 import uvicorn
 import logging
-from datetime import datetime
 from typing import List, Dict
 from logging.handlers import TimedRotatingFileHandler
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from concurrent.futures import ThreadPoolExecutor
+
+### 全局变量
+# 数据缓存
+cached_data = None
+# 全局 Session 对象
+session = requests.Session()
+# fastapi
+app = FastAPI()
 
 ### 日志模块
 def log():
     global logger
-    # 检查是否已经配置了处理器，避免重复配置
+    # 检查是否已经配置了处理器
     if logging.getLogger().handlers:
         return logging.getLogger()
 
-    # 获取所在的目录并创建日志目录
+    # 获取目录
     script_directory = os.path.dirname(os.path.abspath(__file__))
     log_directory = os.path.join(script_directory, "logs")
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 
-    # 配置日志格式
+    # 日志格式
     log_formatter = logging.Formatter(
         "%(asctime)s [%(levelname)s] %(processName)s - %(message)s"
     )
 
-    # 定义日志文件名称和后缀
-    current_date = datetime.now().strftime("%Y%m%d")
-    log_file_name = f"rs{current_date}.log"
-    log_file_path = os.path.join(log_directory, log_file_name)
+    # 日志名称和后缀
+    default_log_file_name = "rs"
+    log_file_path = os.path.join(log_directory, default_log_file_name)
 
     # 创建日志文件处理器,每天分割日志文件
     log_file_handler = TimedRotatingFileHandler(
@@ -45,6 +50,7 @@ def log():
         backupCount=30,
         encoding="utf-8",
     )
+    log_file_handler.suffix = "%Y-%m-%d.log"
     log_file_handler.setFormatter(log_formatter)
 
     # 创建并配置 logger
@@ -54,8 +60,23 @@ def log():
 
     return logger
 
-# 初始化 logger
 logger = log()
+
+
+### 合并日志与打印信息
+'''
+用法
+log_print("信息", "等级:     ", "等级")
+'''
+def log_print(message, prefix="", level="INFO"):
+    if isinstance(level, str):
+        level = getattr(logging, level.upper(), logging.INFO)
+    # 日志
+    logger = logging.getLogger()
+    logger.log(level, message)
+    # 打印
+    print(prefix + message)
+
 
 
 ### 配置文件模块
@@ -64,20 +85,17 @@ def load_config():
     try:
         with open("config.yaml", "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
-        logger.debug("配置文件读取成功")
+        log_print("[配置] 配置文件读取成功", "INFO:     ", "INFO")
     except FileNotFoundError:
-        logger.error("配置文件不存在")
+        log_print("[配置] 配置文件不存在", "ERROR:     ", "ERROR")
         sys.exit(1)
     except yaml.YAMLError as e:
-        logger.error(f"解析配置文件时出现问题: {e}")
+        log_print(f"[配置] 解析配置文件时出现问题: {e}", "ERROR:     ", "ERROR")
         sys.exit(1)
 
-    # 配置读取
-    config["HOST"] = config.get("HOST", "127.0.0.1")
-    config["PORT"] = int(config.get("PORT", 11111))
-    logger.debug(f"配置读取：HOST={config['HOST']}, PORT={config['PORT']}")
-
     # 默认值设置
+    config.setdefault("HOST", "127.0.0.1")
+    config.setdefault("PORT", 11111)
     config.setdefault("RECHEME_BASIC", False)
     config.setdefault("RECHEME_BASIC_USER", "")
     config.setdefault("RECHEME_BASIC_PASS", "")
@@ -86,25 +104,12 @@ def load_config():
 
     return config
 
-
 try:
     config = load_config()
 except Exception as e:
-    logger.error(f"加载配置文件时发生未知错误: {e}")
+    log_print(f"[配置] 加载配置文件时发生未知错误: {e}", "ERROR:     ", "ERROR")
     sys.exit(1)
 
-
-# FastAPI设置
-app = FastAPI()
-app.mount("/assets", StaticFiles(directory="./webui/assets"), name="assets")
-templates = Jinja2Templates(directory="webui")
-
-
-### 一些全局变量
-# 数据缓存
-cached_data = None
-# 全局 Session 对象
-session = requests.Session()
 
 
 # 根据API信息构建请求头
@@ -117,7 +122,7 @@ def build_request_headers(api_info: Dict) -> Dict:
             "BASIC_KEY", config.get("BLREC", {}).get("BLREC_BASIC_KEY", "")
         )
         headers["x-api-key"] = api_key
-        logger.debug("BLREC请求头构建完毕: %s", api_key)
+        logger.debug("[请求] BLREC请求头构建完毕: %s", api_key)
     elif rectype == "recheme":
         if api_info.get("BASIC", config.get("RECHEME", {}).get("RECHEME_BASIC", False)):
             user = api_info.get(
@@ -131,7 +136,7 @@ def build_request_headers(api_info: Dict) -> Dict:
                 "utf-8"
             )
             headers["Authorization"] = f"Basic {encoded_credentials}"
-            logger.debug("录播姬请求头构建完毕: %s", auth_str)
+            logger.debug("[请求] 录播姬请求头构建完毕: %s", auth_str)
 
     return headers
 
@@ -149,18 +154,18 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
         if response.status_code == 200:
             data = response.json()
             if isinstance(data, list):
-                logger.debug(f"从 {url} 获取到数据数量: {len(data)}")
+                logger.debug(f"[请求] 从 {url} 获取到数据量: {len(data)}")
             elif isinstance(data, dict):
-                logger.debug(f"从 {url} 获取到数据数量: 1")
+                logger.debug(f"[请求] 从 {url} 获取到数据量: 1")
             return data
         else:
-            logger.error(f"请求失败，状态码: {response.status_code}, URL: {url}")
+            log_print(f"[请求] 请求失败，状态码: {response.status_code}, URL: {url}", "ERROR:     ", "ERROR")
             return []
     except requests.exceptions.Timeout:
-        logger.error(f"请求超时, URL: {url}")
+        log_print(f"[请求] 请求超时, URL: {url}", "ERROR:     ", "ERROR")
         return []
     except Exception as e:
-        logger.error(f"请求异常: {e}, URL: {url}")
+        log_print(f"[请求] 请求异常: {e}, URL: {url}", "ERROR:     ", "ERROR")
         return []
 
 
@@ -202,7 +207,8 @@ def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
     global cached_data
 
     if cached_data is None:
-        logger.warning("缓存数据为空，正在重新获取所有数据")
+        log_print("[请求] 缓存数据为空，正在重新获取所有数据", "WARN:     ", "WARN")
+        # logger.warning("[请求] 缓存数据为空，正在重新获取所有数据")
         cached_data = fetch_data()
 
     room_data = []
@@ -230,7 +236,7 @@ def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
                 )
                 room_data.append(single_room_data)
 
-                logger.debug(f"获取到的直播间数据: {single_room_data}")
+                logger.debug(f"[请求] 获取到的直播间数据: {single_room_data}")
 
     return room_data
 
@@ -245,94 +251,99 @@ def fetch_data() -> List[Dict]:
                 if isinstance(api_info_list, list):
                     for api_info in api_info_list:
                         api_info.update({"rec_tpye": rectype.lower()})
-                        logger.debug(f"开始获取数据, API信息: {api_info}")
+                        logger.debug(f"[请求] 开始获取数据, API信息: {api_info}")
                         api_data = fetch_api_data(api_info, rec_name)
                         all_data.extend(api_data)
-                        logger.debug(f"已获取数据数量: {len(api_data)}")
+                        logger.debug(f"[请求] 已获取数据量: {len(api_data)}")
 
-    logger.debug(f"总数据量: {len(all_data)}")
+    logger.debug(f"[请求] 总数据量: {len(all_data)}")
     return all_data
 
 
-# webui端点
+# webui设置
+app.mount("/assets", StaticFiles(directory="./webui/assets"), name="assets")
+templates = Jinja2Templates(directory="webui")
+
+# webui路径
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-# webui端点
+# 录播姬cli启动命令生成
 @app.get("/rechemetool", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("recheme.html", {"request": request})
 
 
-# 获取所有数据
+# APi_获取所有数据
 @app.get("/api/data")
 async def get_all_data():
-    logger.info(f'调用路径 @app.get("/api/data")')
+    log_print("[API] 请求获取所有数据", "INFO:     ", "INFO")
+    # logger.debug('[API] 请求获取所有数据')
+    logger.debug(f'[API] 调用路径 @app.get("/api/data")')
     global cached_data
-    logger.debug(f"请求获取所有数据")
     cached_data = fetch_data()
     return {"data": cached_data}
 
 
-# 获取指定直播间数据
+# APi_获取指定直播间数据
 @app.get("/api/data/{roomId:int}")
 async def get_room_by_id(roomId: int):
-    logger.info(f'调用路径 @app.get("/api/data/{roomId}")')
-    logger.debug(f"请求获取房间ID为 {roomId} 的数据")
+    logger.debug(f"[API] 请求获取房间ID为 {roomId} 的数据")
+    logger.debug(f'[API] 调用路径 @app.get("/api/data/{roomId}")')
     room_data = fetch_room_data(str(roomId))
     if not room_data:
-        logger.error(f"不存在该直播间")
+        log_print("[API] 不存在该直播间", "ERROR:     ", "ERROR")
         raise HTTPException(status_code=404, detail="不存在该直播间")
     return {"data": room_data}
 
 
-# 获取 录播姬 所有数据
+# APi_获取 录播姬 所有数据
 @app.get("/api/data/recheme")
 async def get_recheme_data():
-    logger.info(f'调用路径 @app.get("/api/data/recheme")')
+    logger.debug("[API] 请求获取 recheme 类型的所有数据")
+    logger.debug('[API] 调用路径 @app.get("/api/data/recheme")')
     global cached_data
-    logger.debug(f"请求获取 recheme 类型的所有数据")
     cached_data = fetch_data()
     recheme_data = [d for d in cached_data if d["rec_tpye"] == "recheme"]
-    logger.debug(f"获取到的 recheme 数据数量: {len(recheme_data)}")
+    logger.debug(f"[API] 获取到的 recheme 数据量: {len(recheme_data)}")
     return {"data": recheme_data}
 
 
-# 获取 blrec 所有数据
+# APi_获取 blrec 所有数据
 @app.get("/api/data/blrec")
 async def get_blrec_data():
-    logger.info(f'调用路径 @app.get("/api/data/blrec")')
+    logger.debug("[API] 请求获取 blrec 类型的所有数据")
+    logger.debug('[API] 调用路径 @app.get("/api/data/blrec")')
     global cached_data
-    logger.debug(f"请求获取 blrec 类型的所有数据")
     cached_data = fetch_data()
     blrec_data = [d for d in cached_data if d["rec_tpye"] == "blrec"]
-    logger.debug(f"获取到的 blrec 数据数量: {len(blrec_data)}")
+    logger.debug(f"[API] 获取到的 blrec 数据量: {len(blrec_data)}")
     return {"data": blrec_data}
 
 
-# 获取 recheme 指定数据
+# APi_获取 录播姬 指定数据
 @app.get("/api/data/recheme/{roomId:int}")
 async def get_recheme_room_by_id(roomId: int):
-    logger.info(f'调用路径 @app.get("/api/data/recheme/{roomId}")')
-    logger.debug(f"请求获取 recheme 类型房间ID为 {roomId} 的数据")
+    logger.debug(f"[API] 请求获取 recheme 类型房间ID为 {roomId} 的数据")
+    logger.debug(f'[API] 调用路径 @app.get("/api/data/recheme/{roomId}")')
     recheme_room_data = fetch_room_data(str(roomId), "recheme")
     if not recheme_room_data:
-        logger.error(f"录播姬中不存在该直播间")
-        raise HTTPException(status_code=404, detail="录播姬中不存在该直播间")
+        log_print("[API] 录播姬不存在该直播间", "ERROR:     ", "ERROR")
+        raise HTTPException(status_code=404, detail="录播姬不存在该直播间")
     return {"data": recheme_room_data}
 
 
-# 获取 blrec 指定数据
+# APi_获取 blrec 指定数据
 @app.get("/api/data/blrec/{roomId:int}")
 async def get_blrec_room_by_id(roomId: int):
-    logger.info(f'调用路径 @app.get("/api/data/blrec/{roomId}")')
-    logger.debug(f"请求获取 blrec 类型房间ID为 {roomId} 的数据")
+    logger.debug(f"[API] 请求获取 blrec 类型房间ID为 {roomId} 的数据")
+    logger.debug(f'[API] 调用路径 @app.get("/api/data/blrec/{roomId}")')
     blrec_room_data = fetch_room_data(str(roomId), "blrec")
     if not blrec_room_data:
-        logger.error(f"BLREC中不存在该直播间")
-        raise HTTPException(status_code=404, detail="BLREC中不存在该直播间")
+        log_print("[API] BLREC不存在该直播间", "ERROR:     ", "ERROR")
+        raise HTTPException(status_code=404, detail="BLREC不存在该直播间")
     return {"data": blrec_room_data}
 
 
