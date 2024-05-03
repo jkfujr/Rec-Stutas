@@ -1,44 +1,6 @@
-# (可选)全局 监听地址。没有就默认 127.0.0.1
-# 默认 127.0.0.1
-HOST: 127.0.0.1
-# (可选)全局 监听端口。没有就默认 11111
-# 默认 11111
-PORT: 11111
-
-# 录播姬
+# 录播姬(rectpye)
 RECHEME:
-  # (可选)录播姬全局设置 是否启用录播姬认证。没有就默认 false
-  # 默认 false
-  RECHEME_BASIC: false
-  # (可选)录播姬全局设置 录播姬认证账号密码。没有就默认 空
-  # 默认 空
-  RECHEME_BASIC_USER: "admin"
-  RECHEME_BASIC_PASS: "admin"
-
   # 名称，没有限制
-  REC001:
+  Z9001:
     # 录播姬地址
     - URL: http://114.51.41.91:9810
-      # (可选) 是否启用认证，没有就使用 RECHEME 全局设置
-      BASIC: true
-      # (可选) 认证账号密码，没有就使用 RECHEME 全局设置
-      BASIC_USER: "admin"
-      BASIC_PASS: "admin"
-
-# BLREC
-BLREC:
-  # (可选)BLREC全局设置 是否启用BLREC认证。没有就默认 true
-  # 默认 true
-  BLREC_BASIC: true
-  # (可选)BLREC全局设置 BLREC认证账号密码。没有就默认 bili2233
-  # 默认 bili2233
-  BLREC_BASIC_KEY: "88888888"
-
-  # 名称，没有限制
-  REC101:
-    # BLREC地址
-    - URL: https://114514.com:1919
-      # (可选) 是否启用认证，没有就使用 BLREC 全局设置
-      BASIC: true
-      # (可选) 认证KEY，没有就使用 BLREC 全局设置
-      BASIC_KEY: "88888888"
