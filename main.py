@@ -20,6 +20,7 @@ session = requests.Session()
 # fastapi
 app = FastAPI()
 
+
 ### 日志模块
 def log():
     global logger
@@ -60,15 +61,16 @@ def log():
 
     return logger
 
+
 logger = log()
 
 
 ### 合并日志与打印信息
-'''
-用法
-log_print("信息", "等级:     ", "等级")
-'''
 def log_print(message, prefix="", level="INFO"):
+    """
+    用法
+    log_print("信息", "等级:     ", "等级")
+    """
     if isinstance(level, str):
         level = getattr(logging, level.upper(), logging.INFO)
     # 日志
@@ -76,7 +78,6 @@ def log_print(message, prefix="", level="INFO"):
     logger.log(level, message)
     # 打印
     print(prefix + message)
-
 
 
 ### 配置文件模块
@@ -104,12 +105,12 @@ def load_config():
 
     return config
 
+
 try:
     config = load_config()
 except Exception as e:
     log_print(f"[配置] 加载配置文件时发生未知错误: {e}", "ERROR:     ", "ERROR")
     sys.exit(1)
-
 
 
 # 根据API信息构建请求头
@@ -159,7 +160,11 @@ def perform_api_request(url: str, headers: Dict) -> List[Dict]:
                 logger.debug(f"[请求] 从 {url} 获取到数据量: 1")
             return data
         else:
-            log_print(f"[请求] 请求失败，状态码: {response.status_code}, URL: {url}", "ERROR:     ", "ERROR")
+            log_print(
+                f"[请求] 请求失败，状态码: {response.status_code}, URL: {url}",
+                "ERROR:     ",
+                "ERROR",
+            )
             return []
     except requests.exceptions.Timeout:
         log_print(f"[请求] 请求超时, URL: {url}", "ERROR:     ", "ERROR")
@@ -241,7 +246,6 @@ def fetch_room_data(room_id: str, rec_tpye: str = None) -> List[Dict]:
     return room_data
 
 
-
 # API数据请求
 def fetch_data() -> List[Dict]:
     all_data = []
@@ -263,6 +267,7 @@ def fetch_data() -> List[Dict]:
 # webui设置
 app.mount("/assets", StaticFiles(directory="./webui/assets"), name="assets")
 templates = Jinja2Templates(directory="webui")
+
 
 # webui路径
 @app.get("/", response_class=HTMLResponse)
