@@ -23,7 +23,7 @@ pip install -r requirements.txt
 python main.py
 
 # 4.访问
-http://127.0.0.1:1111 (默认)
+http://127.0.0.1:11111 (默认)
 ```
 
 # 更新计划(饼)
