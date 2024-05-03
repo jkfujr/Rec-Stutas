@@ -284,7 +284,7 @@ async def root(request: Request):
 # APi_获取所有数据
 @app.get("/api/data")
 async def get_all_data():
-    log_print("[API] 请求获取所有数据", "INFO:     ", "INFO")
+    logger.debug("[API] 请求获取所有数据")
     # logger.debug('[API] 请求获取所有数据')
     logger.debug(f'[API] 调用路径 @app.get("/api/data")')
     global cached_data
