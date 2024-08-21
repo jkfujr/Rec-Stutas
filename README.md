@@ -6,7 +6,7 @@
 
 一个用 python 实现的 多 录播姬cli/BLREC的信息展示
 
-演示 https://wll.114514.plus:11111/
+演示 https://recs.114514.plus/
 
 # 使用说明
 
