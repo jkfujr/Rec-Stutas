@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>录播姬CLI命令生成</title>
+    <script>
+        function toggleHTTPBindOptions() {
+            const httpOptions = document.getElementById('httpOptions');
+            const isChecked = document.getElementById('enableHttpBind').checked;
+            httpOptions.style.display = isChecked ? 'block' : 'none';
+            if (!isChecked) {
+                document.getElementById('disableFileBrowser').checked = false;
+                document.getElementById('enableHttpAuth').checked = false;
+                toggleHTTPAuthOptions();
+            }
+        }
+
+        function toggleHTTPAuthOptions() {
+            const authOptions = document.getElementById('httpAuthOptions');
+            authOptions.style.display = document.getElementById('enableHttpAuth').checked ? 'block' : 'none';
+        }
+
+        function toggleOtherOptions() {
+            const otherOptions = document.getElementById('otherOptions');
+            otherOptions.style.display = otherOptions.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function generateCommand() {
+            const path = document.getElementById('path').value.trim() || "BililiveRecorder.Cli.exe";
+            const enableHttpBind = document.getElementById('enableHttpBind').checked;
+            const protocol = document.getElementById('protocol').value;
+            const ip = document.getElementById('ip').value.trim() || "*";
+            const port = document.getElementById('port').value.trim() || "23333";
+            const enableHttpAuth = enableHttpBind && document.getElementById('enableHttpAuth').checked;
+            const httpBasicUser = enableHttpAuth ? document.getElementById('httpBasicUser').value.trim() : "";
+            const httpBasicPass = enableHttpAuth ? document.getElementById('httpBasicPass').value.trim() : "";
+            const disableFileBrowser = enableHttpBind && document.getElementById('disableFileBrowser').checked ? " --enable-file-browser false" : "";
+            const enableLogLevel = document.getElementById('enableLogLevel').checked;
+            const logLevel = enableLogLevel ? document.getElementById('logLevel').value : "";
+            const enableLogFileLevel = document.getElementById('enableLogFileLevel').checked;
+            const logFileLevel = enableLogFileLevel ? document.getElementById('logFileLevel').value : "";
+            const certPemPath = document.getElementById('certPemPath').value.trim();
+            const certKeyPath = document.getElementById('certKeyPath').value.trim();
+            const certPfxPath = document.getElementById('certPfxPath').value.trim();
+            const certPassword = document.getElementById('certPassword').value.trim();
+            const configOverride = document.getElementById('configOverride').value.trim();
+            const recordPath = document.getElementById('recordPath').value.trim();
+
+            let command = `${path} run`;
+            if (enableHttpBind) {
+                command += ` --bind "${protocol}://${ip}:${port}"${disableFileBrowser}`;
+            }
+            if (enableHttpAuth) {
+                command += ` --http-basic-user "${httpBasicUser}" --http-basic-pass "${httpBasicPass}"`;
+            }
+            if (logLevel) command += ` -l ${logLevel}`;
+            if (logFileLevel) command += ` --flog ${logFileLevel}`;
+            if (certPemPath && certKeyPath) command += ` --cert-pem-path "${certPemPath}" --cert-key-path "${certKeyPath}"`;
+            if (certPfxPath) command += ` --cert-pfx-path "${certPfxPath}"`;
+            if (certPassword) command += ` --cert-password "${certPassword}"`;
+            if (configOverride) command += ` --config-override "${configOverride}"`;
+
+            command += ` ${recordPath}`;
+
+            document.getElementById('commandOutput').textContent = command;
+        }
+
+        function resetOptions() {
+            document.getElementById('path').value = '';
+            document.getElementById('recordPath').value = '';
+            document.getElementById('protocol').selectedIndex = 0;
+            document.getElementById('ip').value = '';
+            document.getElementById('port').value = '23333';
+            document.getElementById('httpBasicUser').value = '';
+            document.getElementById('httpBasicPass').value = '';
+            document.getElementById('certPemPath').value = '';
+            document.getElementById('certKeyPath').value = '';
+            document.getElementById('certPfxPath').value = '';
+            document.getElementById('certPassword').value = '';
+            document.getElementById('configOverride').value = '';
+
+            document.getElementById('enableHttpBind').checked = false;
+            document.getElementById('disableFileBrowser').checked = false;
+            document.getElementById('enableHttpAuth').checked = false;
+            document.getElementById('enableLogLevel').checked = false;
+            document.getElementById('enableLogFileLevel').checked = false;
+
+            document.getElementById('httpOptions').style.display = 'none';
+            document.getElementById('httpAuthOptions').style.display = 'none';
+            document.getElementById('otherOptions').style.display = 'none';
+            document.getElementById('commandOutput').textContent = '';
+        }
+    </script>
+</head>
+
+<body>
+    <h1>录播姬CLI命令生成</h1>
+
+    <table>
+        <tr>
+            <!-- 录播姬路径 -->
+            <td>
+                <label for="path">录播姬路径:</label>
+            </td>
+            <td>
+                <input type="text" id="path" placeholder="BililiveRecorder.Cli.exe">
+            </td>
+    
+            <!-- 录制路径 -->
+            <td>
+                <label for="recordPath">录制路径:</label>
+            </td>
+            <td>
+                <input type="text" id="recordPath" required>
+            </td>
+        </tr>
+    </table>
+    
+    <br>
+    <!-- WEB管理 -->
+    <div>
+        <label><input type="checkbox" id="enableHttpBind" onclick="toggleHTTPBindOptions()"> WEB管理</label>
+        <div id="httpOptions" class="hidden">
+            <div>
+                <label for="protocol">协议 </label>
+                <select id="protocol">
+                    <option value="http">http</option>
+                    <option value="https">https</option>
+                </select>
+                <label for="ip">IP </label>
+                <input type="text" id="ip" placeholder="*">
+                <label for="port">端口 </label>
+                <input type="text" id="port" placeholder="23333">
+            </div>
+            <label><input type="checkbox" id="disableFileBrowser"> 关闭文件浏览器</label>
+            <label><input type="checkbox" id="enableHttpAuth" onclick="toggleHTTPAuthOptions()"> 启用登录认证</label>
+            <div id="httpAuthOptions" class="hidden">
+                <label for="httpBasicUser">用户名 </label>
+                <input type="text" id="httpBasicUser"><br>
+                <label for="httpBasicPass">密码 </label>
+                <input type="password" id="httpBasicPass">
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- 显示其他选项 -->
+    <div>
+        <button onclick="toggleOtherOptions()">其他选项</button>
+        <div id="otherOptions" class="hidden">
+            <!-- 日志级别选项 -->
+            <div>
+                <label><input type="checkbox" id="enableLogLevel"
+                        onclick="document.getElementById('logLevel').disabled = !this.checked;"> 控制台日志级别:</label>
+                <select id="logLevel" disabled>
+                    <option value="Debug">Debug</option>
+                    <option value="Error">Error</option>
+                    <option value="Fatal">Fatal</option>
+                    <option value="Information">Information</option>
+                    <option value="Verbose">Verbose</option>
+                    <option value="Warning">Warning</option>
+                </select><br>
+                <label><input type="checkbox" id="enableLogFileLevel"
+                        onclick="document.getElementById('logFileLevel').disabled = !this.checked;"> 文件日志级别:</label>
+                <select id="logFileLevel" disabled>
+                    <option value="Debug">Debug</option>
+                    <option value="Error">Error</option>
+                    <option value="Fatal">Fatal</option>
+                    <option value="Information">Information</option>
+                    <option value="Verbose">Verbose</option>
+                    <option value="Warning">Warning</option>
+                </select>
+            </div>
+            <br>
+            <!-- 其他配置选项 -->
+            <div>
+                <label for="configOverride">配置文件路径:</label>
+                <input type="text" id="configOverride">
+                <br><br>
+                <label for="certPemPath">证书PEM路径:</label>
+                <input type="text" id="certPemPath"><br>
+                <label for="certKeyPath">证书KEY路径:</label>
+                <input type="text" id="certKeyPath"><br>
+                <label for="certPfxPath">证书PFX路径:</label>
+                <input type="text" id="certPfxPath"><br>
+                <label for="certPassword">证书密码:</label>
+                <input type="password" id="certPassword">
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- 生成和重置按钮 -->
+    <button onclick="generateCommand()">生成</button>
+    <button onclick="resetOptions()">重置</button>
+
+    <!-- 命令输出区域 -->
+    <h2>命令</h2>
+    <pre id="commandOutput"></pre>
+</body>
+
+</html>
