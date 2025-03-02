@@ -352,7 +352,7 @@
               <a class="nav-link active" aria-current="page" href="http://10.0.0.101:9099" target="_blank">录播姬喵</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="http://5.181.225.147:65398"
+              <a class="nav-link active" aria-current="page" href="http://5.181.225.4:65398"
                 target="_blank">API状态喵</a>
             </li>
           </ul>
@@ -660,8 +660,19 @@
       const streamingA = isStreaming(a) ? 0 : 1;
       const streamingB = isStreaming(b) ? 0 : 1;
       if (streamingA !== streamingB) return streamingA - streamingB;
-      return (a.name || a.user_info.name).localeCompare(
-        b.name || b.user_info.name,
+      
+      // 安全获取名称，处理空值
+      const getName = (user) => {
+        if (user.rec_tpye === "recheme") {
+          return user.name || '未知用户/加密直播间';
+        } else if (user.rec_tpye === "blrec") {
+          return user.user_info?.name || '未知用户/加密直播间';
+        }
+        return '未知用户/加密直播间';
+      };
+      
+      return getName(a).localeCompare(
+        getName(b),
         ["en", "ja", "zh-Hans-CN"],
         { sensitivity: "accent" }
       );
@@ -825,15 +836,21 @@
 
     // 用户列表项
     function createUserItem(user) {
-      const name =
-        user.rec_tpye === "recheme" ? user.name : user.user_info.name;
-      const iconClass =
-        user.rec_tpye === "recheme" ? "recheme-icon" : "blrec-icon";
+      // 处理名称显示
+      let name;
+      if (user.rec_tpye === "recheme") {
+        name = user.name || '未知用户/加密直播间';
+      } else {
+        name = (user.user_info?.name) || '未知用户/加密直播间';
+      }
+      
+      const iconClass = user.rec_tpye === "recheme" ? "recheme-icon" : "blrec-icon";
       const streamingClass = isStreaming(user) ? "streaming" : "";
-      return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${user.rec_tpye === "recheme" ? user.roomId : user.room_info.room_id
-        }', '${user.rec_tpye}')">
+      return `<div class="user-item ${streamingClass}" onclick="fetchRoomData('${
+        user.rec_tpye === "recheme" ? user.roomId : user.room_info.room_id
+      }', '${user.rec_tpye}')">
                 <div class="${iconClass}"></div>${name}
-            </div>`;
+              </div>`;
     }
 
     loadUserList();
