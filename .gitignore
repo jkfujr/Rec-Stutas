@@ -2,6 +2,7 @@ __pycache__/
 .vscode
 Rec-Stutas
 logs
+web
 * copy.*
 config.yaml
 1.ini
