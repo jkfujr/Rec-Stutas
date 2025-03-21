@@ -56,7 +56,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 恢复正确的静态文件挂载
 app.mount("/assets", StaticFiles(directory="web/assets"), name="assets")
 
 @app.get("/", response_class=HTMLResponse)
@@ -280,9 +279,10 @@ def create_recheme_instance(api_info: Dict, rec_name: str) -> RechemeAPI:
     """
     host = api_info.get("URL", "").rstrip('/')
     manage = api_info.get("MANAGE", True)
-    basic_auth = config.get("RECHEME_BASIC", False)
-    username = config.get("RECHEME_BASIC_USER", "")
-    password = config.get("RECHEME_BASIC_PASS", "")
+    
+    basic_auth = api_info.get("BASIC", config.get("RECHEME", {}).get("BASIC", False))
+    username = api_info.get("BASIC_USER", config.get("RECHEME", {}).get("BASIC_USER", ""))
+    password = api_info.get("BASIC_PASS", config.get("RECHEME", {}).get("BASIC_PASS", ""))
     
     return RechemeAPI(
         host=host,
@@ -301,14 +301,17 @@ def create_blrec_instance(api_info: Dict, name: str) -> BLRECAPI:
     :return: BLRECAPI实例
     """
     host = api_info.get("URL", "").rstrip('/')
-    
-    api_key = api_info.get("BASIC_KEY", "")
-    if not api_key and "BLREC_BASIC" in config and config["BLREC_BASIC"]:
-        api_key = config.get("BLREC_BASIC_KEY", "bili2233")
-        
     manage = api_info.get("MANAGE", True)
     
-    return BLRECAPI(host, name, api_key, manage)
+    basic_auth = api_info.get("BASIC", config.get("BLREC", {}).get("BASIC", True))
+    api_key = api_info.get("BASIC_KEY", config.get("BLREC", {}).get("BASIC_KEY", "bili2233"))
+    
+    return BLRECAPI(
+        host=host,
+        name=name,
+        api_key=api_key if basic_auth else "",
+        manage=manage
+    )
 
 def handle_operation_error(operation: str, recType: str, recName: str = None, user: str = None) -> str:
     """处理错误"""
@@ -1054,7 +1057,6 @@ async def favicon_svg():
 
 @app.get("/{full_path:path}", response_class=HTMLResponse)
 async def serve_spa(full_path: str):
-    # 排除API路径
     if full_path.startswith("api/"):
         raise HTTPException(status_code=404, detail="Not Found")
     

@@ -9,23 +9,29 @@ PORT: 11111
 AUTH:
   # 是否启用认证
   ENABLE: true
-  # 用户名称(自定义)
-  你好:
+  # 加密密钥
+  AUTH_KEY: "114514"
+  # 加密密钥过期时间 (分钟)
+  AUTH_KEY_EXPIRE: 1919810
+  # 用户
+  AUTH_USER:
     # 用户名
-    USER: 1!5!
-    # 密码
-    PASS: '114514'
+    你好:
+      # 用户名
+      USER: 114514
+      # 密码
+      PASS: "114514"
 
 
 # 录播姬
 RECHEME:
   # (可选)录播姬全局设置 是否启用录播姬认证。默认 false
   # 默认 false
-  RECHEME_BASIC: false
+  BASIC: false
   # (可选)录播姬全局设置 录播姬认证账号密码。默认 空
   # 默认 空
-  RECHEME_BASIC_USER: ""
-  RECHEME_BASIC_PASS: ""
+  BASIC_USER: ""
+  BASIC_PASS: ""
 
   # 名称，没有限制
   REC001:
@@ -41,10 +47,10 @@ RECHEME:
 BLREC:
   # (可选)BLREC全局设置 是否启用BLREC认证。默认 true
   # 默认 true
-  BLREC_BASIC: true
+  BASIC: true
   # (可选)BLREC全局设置 BLREC认证账号密码。默认 bili2233
   # 默认 bili2233
-  BLREC_BASIC_KEY: "bili2233"
+  BASIC_KEY: "bili2233"
 
   # 名称，没有限制
   REC101:

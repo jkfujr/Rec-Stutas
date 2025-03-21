@@ -16,9 +16,18 @@ class Auth:
         self.secret_key = auth_config.get("AUTH_KEY", "114514")
         self.token_expire_minutes = auth_config.get("AUTH_KEY_EXPIRE", 60 * 24)
         self.users = {}
-        user_configs = auth_config.get("AUTH_USER", {})
         
+        user_configs = auth_config.get("AUTH_USER", {}) or {}
+        
+        if not isinstance(user_configs, dict):
+            logger.warning("[Auth] AUTH_USER 配置无效，使用空字典")
+            user_configs = {}
+            
         for username, user_data in user_configs.items():
+            if not isinstance(user_data, dict):
+                logger.warning(f"[Auth] 用户 {username} 的配置无效，已跳过")
+                continue
+                
             actual_username = user_data.get("USER", username)
             password = user_data.get("PASS", "")
             if password:
@@ -56,7 +65,7 @@ class Auth:
             logger.error(f"Token验证失败: {str(e)}")
             raise HTTPException(status_code=401, detail=f"Token验证失败: {str(e)}")
         
-auth_scheme = HTTPBearer()
+auth_scheme = HTTPBearer(auto_error=False)
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(auth_scheme)) -> str:
     """验证用户"""
@@ -64,6 +73,9 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(auth_sc
     
     if not config.get("AUTH", {}).get("ENABLE", False):
         return "anonymous"
+    
+    if not credentials:
+        raise HTTPException(status_code=401, detail="认证头缺失")
         
     username = auth.verify_token(credentials.credentials)
     if not username:

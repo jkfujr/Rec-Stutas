@@ -1,4 +1,4 @@
-# RecStatus
+# RecStutas
 
 一个**多**录播机管理面板
 
